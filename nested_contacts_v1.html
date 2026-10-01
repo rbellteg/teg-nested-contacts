@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contacts — neste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F2EC;--surface:#FDFAF4;--surface2:#F0EDE6;--border:#E2DDD4;--border-soft:#EDE9E1;
+  --text:#1A1712;--text-2:#6B6560;--text-3:#A09A93;
+  --accent:#C8952A;--accent-light:#F5E8CC;
+  --risk-high:#C0392B;--risk-high-bg:#FAEAEA;
+  --risk-med:#B8650A;--risk-med-bg:#FDF0DC;
+  --risk-low:#2E7D32;--risk-low-bg:#E8F5E9;
+  --risk-unv:#4A6080;--risk-unv-bg:#EDF2F8;
+  --warn:#B8650A;--warn-bg:#FDF0DC;
+  --radius:10px;--radius-sm:6px;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;height:100vh;overflow:hidden;}
+.shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:var(--bg);}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--radius-sm);font-size:13px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .12s;border:1px solid var(--border);background:var(--surface);color:var(--text-2);}
+.btn:hover{background:var(--surface2);color:var(--text);}
+.btn-primary{background:var(--accent);color:#fff;border-color:transparent;}
+.btn-primary:hover{background:#B5841F;}
+.btn-primary:disabled{background:var(--border);color:var(--text-3);cursor:not-allowed;}
+.btn-sm{padding:4px 10px;font-size:11.5px;}
+.btn-danger{color:var(--risk-high);border-color:var(--risk-high-bg);}
+.btn-danger:hover{background:var(--risk-high-bg);color:var(--risk-high);}
+
+/* LIST HEADER */
+.list-header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px 0;flex-shrink:0;}
+.list-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;}
+.list-title{font-size:22px;font-weight:600;letter-spacing:-.025em;color:var(--text);}
+.list-title-meta{font-size:12px;color:var(--text-3);font-family:var(--mono);margin-left:10px;font-weight:400;}
+.title-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+
+.layout-toggle{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface);}
+.lt-btn{padding:6px 11px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-3);border:none;background:transparent;display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);transition:all .1s;}
+.lt-btn:hover{color:var(--text-2);}
+.lt-btn.active{background:var(--accent-light);color:var(--accent);}
+.lt-btn svg{width:13px;height:13px;}
+
+.filter-bar{display:flex;flex-direction:row;align-items:center;gap:14px;padding-bottom:14px;flex-wrap:wrap;}
+.filter-row-search{display:flex;align-items:center;flex-shrink:0;}
+.filter-row-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.search-wrap{position:relative;width:340px;max-width:100%;}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text-3);}
+.search-input{width:100%;padding:7px 12px 7px 34px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--sans);font-size:13px;background:var(--surface);color:var(--text);outline:none;transition:border .12s,box-shadow .12s;}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,149,42,.12);}
+.search-input::placeholder{color:var(--text-3);}
+.fileby-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.fileby-lbl{font-size:11px;color:var(--text-3);white-space:nowrap;}
+.fileby-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface);}
+.ftog{padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-3);transition:all .1s;white-space:nowrap;border:none;background:transparent;font-family:var(--sans);}
+.ftog:hover{color:var(--text-2);}
+.ftog.active{background:var(--accent-light);color:var(--accent);}
+.filter-sep{width:1px;height:18px;background:var(--border);flex-shrink:0;}
+.flt-wrap{position:relative;flex-shrink:0;}
+.flt-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:400;cursor:pointer;border:none;background:transparent;color:var(--text-3);transition:all .1s;font-family:var(--sans);white-space:nowrap;}
+.flt-btn:hover{color:var(--text-2);background:var(--surface2);}
+.flt-btn.has-value{color:var(--accent);font-weight:500;background:var(--accent-light);}
+.flt-btn .flt-caret{font-size:8px;opacity:.5;margin-left:1px;}
+.flt-btn.has-value .flt-caret{opacity:.8;}
+.flt-panel{position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 20px rgba(0,0,0,.10);z-index:300;min-width:220px;padding:10px;display:none;}
+.flt-panel.open{display:block;}
+.flt-panel-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;}
+.flt-option{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--text-2);transition:background .08s;}
+.flt-option:hover{background:var(--surface2);}
+.flt-option.selected{color:var(--accent);font-weight:500;}
+.flt-option .flt-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all .1s;}
+.flt-option.selected .flt-check{border-color:var(--accent);background:var(--accent);color:#fff;}
+.flt-divider{height:1px;background:var(--border-soft);margin:6px 0;}
+.flt-clear{font-size:11px;color:var(--text-3);cursor:pointer;padding:4px 8px;border-radius:var(--radius-sm);transition:all .1s;display:block;text-align:center;}
+.flt-clear:hover{color:var(--risk-high);}
+.risk-pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.rp-high{background:var(--risk-high-bg);color:var(--risk-high);}
+.rp-med{background:var(--risk-med-bg);color:var(--risk-med);}
+.rp-low{background:var(--risk-low-bg);color:var(--risk-low);}
+.rp-unv{background:var(--risk-unv-bg);color:var(--risk-unv);}
+.rp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+.active-filters{display:none;align-items:center;gap:6px;padding:8px 28px;background:var(--surface);border-bottom:1px solid var(--border-soft);flex-wrap:wrap;flex-shrink:0;}
+.active-filters.visible{display:flex;}
+.af-label{font-size:11px;color:var(--text-3);}
+.af-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--bg);color:var(--text-2);}
+.af-chip button{background:none;border:none;cursor:pointer;color:inherit;font-size:12px;line-height:1;padding:0;opacity:.6;}
+.af-chip button:hover{opacity:1;}
+.af-clear-all{margin-left:auto;font-size:11px;color:var(--text-3);cursor:pointer;padding:2px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-family:var(--sans);transition:all .1s;}
+.af-clear-all:hover{color:var(--text);border-color:var(--text-3);}
+
+.view-flat,.view-split,.view-company{flex:1;min-height:0;overflow:hidden;display:none;}
+.view-flat.active{display:flex;flex-direction:column;}
+.view-split.active{display:grid;grid-template-columns:380px 1fr;height:100%;}
+.view-company.active{display:flex;flex-direction:column;}
+
+/* ─────────────────────────── FLAT VIEW ─────────────────────────── */
+.flat-wrap{flex:1;overflow:hidden;padding:16px 28px 0;min-height:0;display:flex;flex-direction:column;}
+.flat-table-shell{flex:1;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-height:0;}
+.flat-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.flat-table thead th{padding:9px 12px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);background:var(--surface2);border-bottom:1px solid var(--border-soft);text-align:left;white-space:nowrap;cursor:pointer;transition:color .1s;user-select:none;position:relative;}
+.flat-table thead th:hover{color:var(--text-2);}
+.sorted{color:var(--text) !important;}
+.sort-icon{margin-left:3px;opacity:.4;font-size:9px;}
+.sorted .sort-icon{opacity:1;}
+
+.col-contact{width:12%;}
+.col-company{width:13%;}
+.col-risk{width:7%;}
+.col-address{width:11%;}
+.col-w3w{width:4%;text-align:center !important;padding-left:0 !important;padding-right:0 !important;}
+.col-access{width:9%;text-align:center !important;padding-left:2px !important;padding-right:2px !important;white-space:nowrap;line-height:1.3;}
+.col-phone{width:9%;}
+.col-email{width:11%;}
+.col-notes{width:5%;text-align:center !important;padding-left:0 !important;padding-right:0 !important;white-space:nowrap;}
+.col-used{width:9%;}
+.col-invoiced{width:8%;}
+
+.flat-table tbody tr{border-bottom:1px solid var(--border-soft);transition:background .08s;cursor:pointer;}
+.flat-table tbody tr:last-child{border-bottom:none;}
+.flat-table tbody tr:hover{background:#FAF7F0;}
+.flat-table td{padding:8px 12px;vertical-align:middle;}
+.flat-table td.icon-td{padding:8px 4px;text-align:center;}
+
+.contact-cell{display:flex;align-items:center;gap:9px;}
+.avatar{width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.contact-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.25;}
+.contact-role{font-size:11px;color:var(--text-3);margin-top:1px;line-height:1.2;}
+.company-cell{display:flex;align-items:center;gap:9px;min-width:0;position:relative;}
+.co-mini-logo{width:26px;height:26px;border-radius:6px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.company-info{min-width:0;flex:1;}
+.company-name{font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px;}
+.company-ta{font-size:10.5px;color:var(--text-3);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.company-unv{font-size:11px;color:var(--text-3);font-style:italic;}
+
+.addr-line1{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.addr-line2{font-size:11px;color:var(--text-3);margin-top:1px;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.phone{font-size:12px;color:var(--text);font-family:var(--mono);}
+.email-link{font-size:12px;color:#2563A8;text-decoration:none;}
+.email-link:hover{text-decoration:underline;}
+.cell-dash{color:var(--text-3);}
+.used-date{font-size:12px;color:var(--text-2);font-family:var(--mono);}
+.used-never{font-size:11px;color:var(--text-3);}
+.risk{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.risk-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.r-high{background:var(--risk-high-bg);color:var(--risk-high);}
+.r-med{background:var(--risk-med-bg);color:var(--risk-med);}
+.r-low{background:var(--risk-low-bg);color:var(--risk-low);}
+.r-unv{background:var(--risk-unv-bg);color:var(--risk-unv);}
+
+/* Icon cell + tooltip (flat view) */
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text-2);cursor:default;position:relative;transition:all .12s;}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);z-index:60;}
+.icon-btn.empty{opacity:.32;}
+.icon-btn.empty:hover{border-color:var(--border);color:var(--text-3);background:var(--surface);}
+.icon-btn svg{width:13px;height:13px;}
+.w3w-mark{font-size:11.5px;font-weight:700;color:#E11F26;letter-spacing:-.05em;line-height:1;}
+.icon-btn:hover .w3w-mark{color:var(--accent);}
+.icon-btn.empty .w3w-mark{color:var(--text-3);}
+.tt{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#221E18;color:#FDFAF4;padding:9px 11px;border-radius:7px;font-size:11.5px;line-height:1.5;text-align:left;white-space:normal;width:max-content;max-width:240px;opacity:0;pointer-events:none;transition:opacity .14s ease;z-index:200;font-family:var(--sans);font-weight:400;letter-spacing:0;text-transform:none;box-shadow:0 6px 20px rgba(0,0,0,.22);}
+.tt::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#221E18;}
+.tt-title{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8952A;margin-bottom:4px;display:block;}
+.tt-empty{color:#A09A93;font-style:italic;}
+.tt-w3w-line{font-family:var(--mono);font-weight:500;color:#F5E8CC;font-size:12px;}
+.tt-w3w-line .mk{color:#F0B5B5;font-weight:700;}
+.icon-btn:hover .tt{opacity:1;pointer-events:auto;}
+.flat-table th{position:relative;}
+.col-tt-wrap{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);width:max-content;max-width:220px;background:#221E18;color:#FDFAF4;padding:8px 11px;border-radius:7px;font-size:11px;line-height:1.45;text-align:left;opacity:0;pointer-events:none;transition:opacity .14s;z-index:120;font-family:var(--sans);font-weight:400;letter-spacing:0;text-transform:none;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:normal;}
+.col-tt-wrap::before{content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:#221E18;}
+.flat-table th:hover .col-tt-wrap{opacity:1;}
+
+.no-results-cell{padding:50px 28px;text-align:center;color:var(--text-3);font-size:13px;}
+
+/* ─────────────────────────── SPLIT VIEW ─────────────────────────── */
+.split-list{border-right:1px solid var(--border);background:var(--surface);overflow-y:auto;display:flex;flex-direction:column;min-height:0;}
+.split-list::-webkit-scrollbar{width:7px;}
+.split-list::-webkit-scrollbar-track{background:transparent;}
+.split-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.split-list::-webkit-scrollbar-thumb:hover{background:var(--text-3);}
+.split-detail{background:var(--bg);overflow-y:auto;}
+.split-detail::-webkit-scrollbar{width:7px;}
+.split-detail::-webkit-scrollbar-track{background:transparent;}
+.split-detail::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.split-detail::-webkit-scrollbar-thumb:hover{background:var(--text-3);}
+
+.split-list-head{padding:11px 18px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);background:var(--surface2);border-bottom:1px solid var(--border-soft);position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;}
+.sli{padding:12px 18px;border-bottom:1px solid var(--border-soft);cursor:pointer;display:flex;align-items:flex-start;gap:11px;transition:background .08s;border-left:3px solid transparent;position:relative;}
+.sli:hover{background:var(--surface2);}
+.sli.active{background:var(--accent-light);border-left-color:var(--accent);}
+.sli-av{width:34px;height:34px;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.sli-info{flex:1;min-width:0;}
+.sli-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;}
+.sli-meta{font-size:11px;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sli-co{font-size:11px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sli-phone{font-size:10.5px;color:var(--text-3);font-family:var(--mono);margin-top:3px;}
+.sli-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.sli-mini-pill{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;}
+
+/* Sticky breadcrumb bar — lives at top of detail panel, above the contact card */
+.sd-breadcrumb{position:sticky;top:0;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--border);}
+.sd-back{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--text-2);padding:6px 12px 6px 8px;border-radius:var(--radius-sm);transition:all .1s;}
+.sd-back:hover{color:var(--accent);background:var(--accent-light);}
+.sd-back svg{width:14px;height:14px;}
+.sd-breadcrumb-trail{font-size:11px;color:var(--text-3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sd-breadcrumb-trail .crumb-sep{margin:0 6px;color:var(--border);}
+.sd-breadcrumb-trail .crumb-current{color:var(--text-2);}
+
+/* Split detail panel */
+.sd-header{padding:14px 24px 18px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:46px;z-index:4;}
+.sd-header-row{display:flex;align-items:flex-start;gap:13px;}
+.sd-av{width:48px;height:48px;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sd-h-info{flex:1;min-width:0;}
+.sd-name{font-size:18px;font-weight:600;letter-spacing:-.02em;line-height:1.15;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sd-role{font-size:13px;color:var(--text-2);margin-top:3px;}
+.sd-h-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.sd-actions{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;}
+
+.sd-body{padding:18px 24px 28px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.sd-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.sd-section.full{grid-column:1 / -1;}
+.sd-sec-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.sd-sec-title .sd-sec-action{font-size:10.5px;font-weight:500;color:var(--text-3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:var(--sans);text-transform:none;letter-spacing:0;transition:all .1s;}
+.sd-sec-action:hover{color:var(--accent);background:var(--accent-light);}
+
+.sd-field{margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;}
+.sd-field:last-child{margin-bottom:0;}
+.sd-field-lbl{font-size:10.5px;color:var(--text-3);min-width:62px;padding-top:1px;}
+.sd-field-val{font-size:12.5px;color:var(--text);flex:1;font-family:var(--mono);word-break:break-word;}
+.sd-field-val.t{font-family:var(--sans);}
+.sd-field-val.em{color:#2563A8;font-family:var(--sans);}
+
+.sd-comp-card{display:flex;align-items:flex-start;gap:11px;}
+.sd-comp-logo{width:36px;height:36px;border-radius:7px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sd-comp-info{flex:1;min-width:0;}
+.sd-comp-name{font-size:13.5px;font-weight:600;}
+.sd-comp-ta{font-size:11px;color:var(--text-3);font-style:italic;margin-top:1px;}
+.sd-comp-meta{font-size:10.5px;color:var(--text-2);font-family:var(--mono);margin-top:7px;display:flex;flex-direction:column;gap:3px;}
+.sd-comp-meta .k{color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;font-size:9.5px;margin-right:6px;}
+.sd-comp-empty{font-size:12px;color:var(--text-3);font-style:italic;}
+.sd-comp-risk{margin-top:11px;padding-top:11px;border-top:1px dashed var(--border-soft);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sd-comp-risk .lbl{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);}
+
+/* Verification badge in company card */
+.verif-row{margin-top:9px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.verif-fresh{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--risk-low);text-transform:uppercase;letter-spacing:.06em;}
+.verif-fresh .tk{font-size:11px;}
+.verif-detail{font-size:10.5px;color:var(--text-3);font-family:var(--mono);}
+
+/* Address section */
+.sd-addr-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;}
+.sd-addr-grid .full{grid-column:1 / -1;}
+.sd-addr-field{display:flex;flex-direction:column;gap:3px;}
+.sd-addr-lbl{font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);}
+.sd-addr-val{font-size:13.5px;color:var(--text);font-family:var(--sans);font-weight:500;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);min-height:34px;display:flex;align-items:center;}
+.sd-addr-val.empty{color:var(--text-3);font-weight:400;font-style:italic;}
+
+.sd-w3w{display:flex;align-items:center;gap:8px;padding:2px 0;}
+.sd-w3w-mark{color:#B23A3A;font-weight:700;font-size:12.5px;letter-spacing:-.04em;opacity:.75;}
+.sd-w3w-addr{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);}
+.sd-w3w-copy{margin-left:auto;font-size:11px;font-weight:500;color:var(--text-3);background:none;border:none;cursor:pointer;padding:3px 8px;border-radius:4px;font-family:var(--sans);transition:all .1s;}
+.sd-w3w-copy:hover{color:var(--accent);background:var(--accent-light);}
+.sd-w3w-empty{font-size:12px;color:var(--text-3);font-style:italic;}
+
+.sd-sub-title{font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin:14px 0 7px;}
+
+.sd-notes-text{font-size:12.5px;color:var(--text);line-height:1.6;}
+.sd-notes-text.italic{font-style:italic;color:var(--text-2);}
+.sd-notes-empty{font-size:12px;color:var(--text-3);font-style:italic;}
+
+/* Sibling contacts panel — horizontal scroll/pan */
+.sib-scroll-wrap{position:relative;}
+.sib-grid{display:flex;gap:9px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 10px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.sib-grid::-webkit-scrollbar{height:7px;}
+.sib-grid::-webkit-scrollbar-track{background:transparent;}
+.sib-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.sib-grid::-webkit-scrollbar-thumb:hover{background:var(--text-3);}
+.sib-card{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .12s;text-align:left;flex:0 0 240px;min-width:240px;scroll-snap-align:start;}
+.sib-card:hover{border-color:var(--accent);background:var(--accent-light);}
+.sib-card .sib-av{width:30px;height:30px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sib-card .sib-info{flex:1;min-width:0;}
+.sib-card .sib-name{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sib-card .sib-role{font-size:10.5px;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sib-card .sib-pill{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:8px;font-size:9.5px;font-weight:600;flex-shrink:0;}
+.sib-empty{font-size:12px;color:var(--text-3);font-style:italic;}
+/* Scroll affordance buttons (appear when overflowing) */
+.sib-nav{position:absolute;top:50%;transform:translateY(-60%);width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--text-2);z-index:5;transition:all .12s;}
+.sib-nav:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-light);}
+.sib-nav.show{display:flex;}
+.sib-nav.prev{left:-6px;}
+.sib-nav.next{right:-6px;}
+.sib-nav svg{width:12px;height:12px;}
+/* Edge fade hints */
+.sib-scroll-wrap::before,.sib-scroll-wrap::after{content:"";position:absolute;top:0;bottom:10px;width:24px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:3;}
+.sib-scroll-wrap::before{left:0;background:linear-gradient(to right,var(--surface),transparent);}
+.sib-scroll-wrap::after{right:0;background:linear-gradient(to left,var(--surface),transparent);}
+.sib-scroll-wrap.fade-left::before{opacity:1;}
+.sib-scroll-wrap.fade-right::after{opacity:1;}
+
+.sd-empty{padding:60px 32px;text-align:center;color:var(--text-3);}
+.sd-empty strong{display:block;font-size:14px;color:var(--text-2);margin-bottom:6px;font-weight:600;}
+
+.sd-last-used{font-size:11px;color:var(--text-3);font-family:var(--mono);}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:11px 28px;font-size:12px;color:var(--text-3);font-family:var(--mono);background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;}
+.pg-btns{display:flex;gap:6px;}
+.pg-btn{padding:6px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:var(--sans);background:var(--surface);color:var(--text-2);cursor:pointer;transition:all .1s;}
+.pg-btn:hover{background:var(--surface2);}
+.pg-btn:disabled{opacity:.4;cursor:default;}
+.pg-numbers{display:flex;gap:2px;}
+.pg-num{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);font-size:12px;font-family:var(--sans);cursor:pointer;color:var(--text-2);transition:background .1s;}
+.pg-num:hover{background:var(--surface2);}
+.pg-num.active{background:var(--accent);color:#fff;font-weight:600;}
+
+/* ─────────────────────────── COMPANY VIEW (flat expandable) ─────────────────────────── */
+.co-flat-wrap{flex:1;overflow:hidden;padding:16px 28px 0;min-height:0;display:flex;flex-direction:column;}
+.co-flat-shell{flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-height:0;}
+.co-flat-shell::-webkit-scrollbar{width:7px;}
+.co-flat-shell::-webkit-scrollbar-track{background:transparent;}
+.co-flat-shell::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* Company row header */
+.co-row{border-bottom:1px solid var(--border-soft);}
+.co-row:last-child{border-bottom:none;}
+.co-row-head{display:flex;align-items:center;gap:13px;padding:12px 18px;cursor:pointer;transition:background .08s;user-select:none;}
+.co-row-head:hover{background:var(--surface2);}
+.co-row-head.open{background:var(--surface2);}
+.co-row-logo{width:34px;height:34px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.co-row-info{flex:1;min-width:0;}
+.co-row-name{font-size:13.5px;font-weight:600;color:var(--text);}
+.co-row-sub{font-size:11px;color:var(--text-3);margin-top:1px;font-family:var(--mono);}
+.co-row-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.co-row-count{font-size:11px;font-weight:500;color:var(--text-2);background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:20px;}
+.co-row-head.open .co-row-count{background:var(--surface);color:var(--text-2);border-color:var(--border);}
+.co-row-caret{width:16px;height:16px;color:var(--text-3);transition:transform .15s;flex-shrink:0;}
+.co-row-head.open .co-row-caret{transform:rotate(90deg);color:var(--text-2);}
+.co-row-verif{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--risk-low);}
+
+/* Contact sub-rows under company */
+.co-contacts-wrap{display:none;background:var(--surface);border-top:1px solid var(--border-soft);}
+.co-contacts-wrap.open{display:block;}
+.co-contact-row{display:flex;align-items:center;gap:13px;padding:10px 18px 10px 65px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background .08s;}
+.co-contact-row:last-child{border-bottom:none;}
+.co-contact-row:hover{background:var(--surface2);}
+.ccr-av{width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ccr-info{flex:1;min-width:0;}
+.ccr-name{font-size:13px;font-weight:500;color:var(--text);}
+.ccr-role{font-size:11px;color:var(--text-3);margin-top:1px;}
+.ccr-contact{font-size:11px;color:var(--text-2);font-family:var(--mono);margin-top:2px;}
+.ccr-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.ccr-invoiced-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.ccr-invoiced-lbl{font-size:10px;color:var(--text-3);font-weight:500;}
+.ccr-invoiced{font-size:11px;color:#2563A8;font-family:var(--mono);text-decoration:none;}
+.ccr-invoiced:hover{text-decoration:underline;}
+.ccr-no-invoice{font-size:11px;color:var(--text-3);font-style:italic;}
+.co-add-row{display:flex;align-items:center;padding:9px 18px 9px 65px;border-top:1px solid var(--border-soft);background:var(--surface);}
+
+/* Last invoiced cell */
+.invoiced-link{font-size:12px;color:#2563A8;text-decoration:none;font-family:var(--mono);}
+.invoiced-link:hover{text-decoration:underline;}
+.invoiced-never{font-size:11px;color:var(--text-3);}
+
+/* Split list — only shows company-filtered contacts when a contact is selected */
+.split-list-main{flex:1;overflow-y:auto;min-height:0;}
+.split-list-main::-webkit-scrollbar{width:7px;}
+.split-list-main::-webkit-scrollbar-track{background:transparent;}
+.split-list-main::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.split-list-main::-webkit-scrollbar-thumb:hover{background:var(--text-3);}
+
+/* Company section header inside split list */
+.split-co-section{border-bottom:1px solid var(--border-soft);flex-shrink:0;}
+.split-co-banner{padding:9px 14px;background:var(--surface2);display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border-soft);}
+.split-co-logo{width:22px;height:22px;border-radius:5px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.split-co-name{font-size:11px;font-weight:600;color:var(--text-2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.split-co-count{font-size:10px;color:var(--text-3);}
+
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(20px);background:#221E18;color:#FDFAF4;padding:10px 16px;border-radius:8px;font-size:12.5px;font-weight:500;opacity:0;transition:all .2s ease;pointer-events:none;z-index:700;box-shadow:0 8px 24px rgba(0,0,0,.22);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ─────────────────────────── ADD/EDIT-CONTACT MODAL ─────────────────────────── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(33,28,20,.55);z-index:600;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .18s;}
+.modal-backdrop.show{opacity:1;pointer-events:auto;}
+.modal{background:#FFFFFF;border-radius:14px;width:100%;max-width:680px;box-shadow:0 24px 64px rgba(0,0,0,.32);overflow:hidden;transform:translateY(8px);transition:transform .2s;position:relative;display:flex;flex-direction:column;max-height:calc(100vh - 64px);}
+.modal-backdrop.show .modal{transform:translateY(0);}
+.modal-head{padding:20px 26px 14px;border-bottom:1px solid var(--border-soft);flex-shrink:0;background:#FFFFFF;}
+.modal-title{font-size:18px;font-weight:600;letter-spacing:-.02em;}
+.modal-sub{font-size:13px;color:var(--text-2);margin-top:4px;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;color:var(--text-3);cursor:pointer;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .1s;}
+.modal-close:hover{background:var(--surface2);color:var(--text);}
+.modal-body{padding:18px 26px 8px;overflow-y:auto;flex:1;background:#FFFFFF;}
+.modal-body::-webkit-scrollbar{width:7px;}
+.modal-body::-webkit-scrollbar-track{background:transparent;}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.modal-foot{padding:14px 26px;border-top:1px solid #E8E4DE;display:flex;justify-content:flex-end;gap:8px;background:#F5F5F5;flex-shrink:0;align-items:center;}
+.modal-foot .foot-left{margin-right:auto;}
+.btn-delete{background:transparent;border:none;color:var(--text-3);font-size:12px;font-weight:500;font-family:var(--sans);cursor:pointer;padding:6px 10px;border-radius:var(--radius-sm);transition:all .1s;display:inline-flex;align-items:center;gap:5px;}
+.btn-delete:hover{color:var(--risk-high);background:var(--risk-high-bg);}
+.btn-delete svg{width:13px;height:13px;}
+.btn-delete.confirm{color:var(--risk-high);background:var(--risk-high-bg);font-weight:600;}
+.modal-section{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.modal-section:last-child{border-bottom:none;margin-bottom:6px;padding-bottom:0;}
+.modal-section-title{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.modal-section-title .ms-aside{font-size:11px;color:var(--text-2);text-transform:none;letter-spacing:0;font-weight:400;}
+.modal-section.disabled{pointer-events:none;position:relative;}
+.modal-section.disabled .modal-section-title{color:var(--text-2);}
+.modal-section.disabled .field,
+.modal-section.disabled .field-row,
+.modal-section.disabled .addr-search{opacity:.85;}
+.modal-section.disabled .field-lbl{color:var(--text-2);}
+.modal-section.disabled .input{background:#EFEFEF;color:#9A948D;border-color:#DDDAD5;cursor:not-allowed;}
+.modal-section.disabled .input::placeholder{color:#C0BBB5;}
+.modal-locked-hint{display:none;font-size:11px;color:var(--text-2);font-style:italic;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.modal-section.disabled .modal-locked-hint{display:flex;}
+.modal-section:not(.disabled) .modal-locked-hint{display:none !important;}
+
+/* Modal inputs — pure white, clean neutral borders */
+.modal-body .input{background:#FFFFFF;border-color:#D8D3CB;}
+.modal-body .input:focus{background:#FFFFFF;border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,149,42,.12);}
+.modal-body .input::placeholder{color:#B8B2AA;}
+/* Trading name field — auto-filled, read-only style */
+.ta-field-wrap{position:relative;}
+.ta-autofilled{background:#F5F0E5 !important;border-color:#D4BC80 !important;color:var(--text-2) !important;font-style:italic;}
+.ta-autofilled-badge{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:9.5px;font-weight:600;color:#9A7A2A;letter-spacing:.04em;text-transform:uppercase;pointer-events:none;}
+
+.field{margin-bottom:10px;}
+.field:last-child{margin-bottom:0;}
+.field-row{display:grid;gap:10px;margin-bottom:10px;}
+.field-row.cols-2{grid-template-columns:1fr 1fr;}
+.field-lbl{font-size:12px;color:var(--text);margin-bottom:5px;display:block;font-weight:500;}
+.field-lbl .req{color:var(--risk-high);margin-left:2px;}
+.input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--sans);font-size:13.5px;color:var(--text);background:var(--surface);outline:none;transition:border .12s,box-shadow .12s;}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,149,42,.12);}
+.input::placeholder{color:var(--text-3);}
+textarea.input{resize:vertical;min-height:60px;font-family:var(--sans);}
+select.input{cursor:pointer;}
+
+/* Companies House search */
+.cs-search{position:relative;}
+.cs-input-wrap{position:relative;}
+.cs-input-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);pointer-events:none;}
+.cs-input-wrap .input{padding-left:32px;}
+.cs-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-height:240px;overflow-y:auto;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.16);display:none;}
+.cs-results.open{display:block;}
+.cs-result{padding:10px 12px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background .08s;}
+.cs-result:last-child{border-bottom:none;}
+.cs-result:hover{background:var(--surface2);}
+.cs-result-name{font-size:13px;font-weight:500;color:var(--text);}
+.cs-result-meta{font-size:10.5px;color:var(--text-3);font-family:var(--mono);margin-top:2px;}
+.cs-result-addr{font-size:11.5px;color:var(--text-2);margin-top:2px;}
+.cs-empty{padding:18px;text-align:center;color:var(--text-3);font-size:12px;}
+.cs-empty strong{display:block;color:var(--text-2);margin-bottom:3px;}
+.cs-manual-link{margin-top:10px;padding-top:9px;border-top:1px solid var(--border-soft);font-size:11.5px;color:var(--text-3);}
+.cs-manual-link a{color:var(--accent);font-weight:500;text-decoration:none;}
+.cs-manual-link a:hover{text-decoration:underline;}
+.cs-vat-hint{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:11.5px;font-weight:500;color:#2E7D32;background:#E8F5E9;border-bottom:1px solid #C8E6C9;}
+.cs-vat-field{margin-top:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+.cs-vat-lbl{display:block;font-size:11px;font-weight:500;color:var(--text-2);margin-bottom:6px;}
+.cs-vat-optional{font-weight:400;color:var(--text-3);margin-left:4px;}
+.cs-vat-input{font-family:var(--mono);font-size:12.5px;max-width:200px;}
+.cs-vat-input.cs-vat-locked{background:#EFEFEF;color:var(--text-2);border-color:#DDDAD5;cursor:not-allowed;}
+.cs-vat-prefilled{margin-top:6px;font-size:11px;color:#2E7D32;display:flex;align-items:center;gap:4px;}
+
+.cs-selected{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border:1px solid var(--border);background:var(--surface2);border-radius:var(--radius-sm);}
+.cs-sel-logo{width:36px;height:36px;border-radius:7px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cs-sel-info{flex:1;min-width:0;}
+.cs-sel-name{font-size:13.5px;font-weight:600;}
+.cs-sel-meta{font-size:11px;color:var(--text-2);font-family:var(--mono);margin-top:3px;}
+.cs-sel-addr{font-size:11.5px;color:var(--text-2);margin-top:3px;}
+.cs-change{background:none;border:none;font-size:11px;color:var(--text-3);cursor:pointer;align-self:flex-start;flex-shrink:0;text-decoration:underline;font-family:var(--sans);}
+.cs-change:hover{color:var(--accent);}
+.cs-change[disabled]{opacity:.4;cursor:not-allowed;}
+
+/* Discrete info tooltip — used next to Company section title */
+.info-tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--surface2);color:var(--text-3);font-size:9.5px;font-weight:600;cursor:help;position:relative;font-family:var(--sans);margin-left:5px;border:1px solid var(--border);transition:all .12s;text-transform:none;letter-spacing:0;vertical-align:middle;}
+.info-tip:hover, .info-tip:focus{background:var(--accent-light);color:var(--accent);border-color:var(--accent-light);outline:none;}
+.info-tip-pop{position:absolute;top:calc(100% + 8px);left:-8px;background:#221E18;color:#FDFAF4;padding:9px 11px;border-radius:7px;font-size:11.5px;line-height:1.5;width:240px;opacity:0;pointer-events:none;transition:opacity .14s;z-index:200;font-weight:400;text-transform:none;letter-spacing:0;box-shadow:0 6px 20px rgba(0,0,0,.22);}
+.info-tip-pop::before{content:"";position:absolute;bottom:100%;left:14px;border:5px solid transparent;border-bottom-color:#221E18;}
+.info-tip-pop a{color:#F5E8CC;text-decoration:underline;}
+.info-tip:hover .info-tip-pop, .info-tip:focus .info-tip-pop{opacity:1;pointer-events:auto;}
+
+/* HERE Maps address search — top of Address section */
+.addr-search{position:relative;margin-bottom:14px;}
+.addr-search-wrap{position:relative;}
+.addr-search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);pointer-events:none;}
+.addr-search-wrap .input{padding-left:32px;}
+.addr-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-height:240px;overflow-y:auto;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.16);display:none;}
+.addr-results.open{display:block;}
+.addr-result{padding:9px 12px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background .08s;display:flex;gap:10px;align-items:flex-start;}
+.addr-result:last-child{border-bottom:none;}
+.addr-result:hover{background:var(--surface2);}
+.addr-result-pin{width:14px;height:14px;color:var(--text-3);flex-shrink:0;margin-top:2px;}
+.addr-result-text{flex:1;min-width:0;}
+.addr-result-line1{font-size:12.5px;color:var(--text);font-weight:500;}
+.addr-result-line2{font-size:11px;color:var(--text-3);margin-top:2px;}
+.addr-attribution{padding:6px 10px;font-size:9.5px;color:var(--text-3);text-align:right;border-top:1px solid var(--border-soft);background:var(--surface2);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.4px;}
+
+.w3w-input-wrap{display:flex;align-items:center;gap:6px;}
+.w3w-input-wrap .w3w-prefix{font-weight:700;color:#E11F26;font-size:14px;letter-spacing:-.04em;}
+.w3w-input-wrap .input{font-family:var(--mono);}
+
+
+
+</style>
+</head>
+<body>
+<div class="shell">
+<main class="main" id="main">
+
+  <div class="list-header">
+    <div class="list-title-row">
+      <div style="display:flex;align-items:baseline;">
+        <span class="list-title">Contacts</span>
+        <span class="list-title-meta" id="listMeta">247 contacts · 68 companies</span>
+      </div>
+      <div class="title-actions">
+        <div class="layout-toggle">
+          <button class="lt-btn active" data-layout="flat" onclick="setLayout('flat')" title="List view">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+            List
+          </button>
+          <button class="lt-btn" data-layout="company" onclick="setLayout('company')" title="Company view — browse by company">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="5" height="7" rx="1"/><rect x="9" y="4" width="5" height="10" rx="1"/><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v1"/></svg>
+            Company
+          </button>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">+ New contact</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-row-search">
+        <div class="search-wrap">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+          <input class="search-input" id="searchInput" type="text" placeholder="Search contacts">
+        </div>
+      </div>
+      <div class="filter-row-controls">
+
+        <div class="flt-wrap" id="dateWrap">
+          <button class="flt-btn" id="dateBtn" onclick="togglePanel('datePanel')"><span>Last used</span><span class="flt-caret">▾</span></button>
+          <div class="flt-panel" id="datePanel">
+            <div class="flt-panel-title">Last used on load</div>
+            <div class="flt-option" data-date="7" onclick="selectDate('7',this)"><span class="flt-check"></span>Last 7 days</div>
+            <div class="flt-option" data-date="30" onclick="selectDate('30',this)"><span class="flt-check"></span>Last 30 days</div>
+            <div class="flt-option" data-date="90" onclick="selectDate('90',this)"><span class="flt-check"></span>Last 90 days</div>
+            <div class="flt-option" data-date="never" onclick="selectDate('never',this)"><span class="flt-check"></span>Never used</div>
+            <div class="flt-divider"></div>
+            <span class="flt-clear" onclick="clearDate()">Clear</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="active-filters" id="activeFilters">
+    <span class="af-label">Filtered by</span>
+    <span id="af-chips"></span>
+    <button class="af-clear-all" onclick="clearAllFilters()">Clear all</button>
+  </div>
+
+  <!-- FLAT VIEW -->
+  <div class="view-flat active" id="view-flat">
+    <div class="flat-wrap">
+      <div class="flat-table-shell">
+        <table class="flat-table">
+          <thead><tr>
+            <th class="col-contact sorted">Contact <span class="sort-icon">↑</span></th>
+            <th class="col-company">Company</th>
+            <th class="col-address">Address</th>
+            <th class="col-w3w">W3W<div class="col-tt-wrap">What3Words — a 3-word reference for the exact location, useful for drivers finding the entrance.</div></th>
+            <th class="col-access">Access notes<div class="col-tt-wrap">Access notes — gate codes, HGV entrance, anything a driver needs on arrival.</div></th>
+            <th class="col-phone">Phone</th>
+            <th class="col-email">Email</th>
+            <th class="col-notes">Notes<div class="col-tt-wrap">Contact notes — payment terms, contract notes, customer-facing context.</div></th>
+            <th class="col-used">Last used</th>
+            <th class="col-invoiced">Last invoiced<div class="col-tt-wrap">Last time an invoice was created for this contact in SmartPay.</div></th>
+          </tr></thead>
+          <tbody id="flat-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPLIT VIEW -->
+  <div class="view-split" id="view-split">
+    <div class="split-list" id="split-list-wrap" style="display:flex;flex-direction:column;overflow:hidden;">
+      <div class="split-list-head">
+        <span id="splitListCount">13 contacts</span>
+        <span style="font-size:9.5px;color:var(--text-3);" id="splitListSub">ALL CONTACTS</span>
+      </div>
+      <!-- Company banner: shown when a contact with a company is selected -->
+      <div class="split-co-section" id="splitCoBanner" style="display:none;">
+        <div class="split-co-banner">
+          <div class="split-co-logo" id="splitCoLogo"></div>
+          <div class="split-co-name" id="splitCoName"></div>
+          <div class="split-co-count" id="splitCoCount"></div>
+        </div>
+      </div>
+      <div class="split-list-main" id="split-list"></div>
+    </div>
+    <div class="split-detail" id="split-detail"></div>
+  </div>
+
+  <!-- COMPANY VIEW -->
+  <div class="view-company" id="view-company">
+    <div class="co-flat-wrap">
+      <div class="co-flat-shell">
+        <div id="co-flat-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pagination">
+    <div id="pgMeta">Showing 13 of 247 &nbsp;·&nbsp; page 1 of 19</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="pg-numbers"><div class="pg-num active">1</div><div class="pg-num">2</div><div class="pg-num">3</div><div class="pg-num" style="color:var(--text-3);cursor:default;">…</div><div class="pg-num">19</div></div>
+      <div class="pg-btns"><button class="pg-btn" disabled>← Prev</button><button class="pg-btn">Next →</button></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ADD/EDIT-CONTACT MODAL -->
+<div class="modal-backdrop" id="addModal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal" role="dialog" aria-labelledby="addModalTitle">
+    <button class="modal-close" onclick="closeAddModal()" aria-label="Close">✕</button>
+    <div class="modal-head">
+      <div class="modal-title" id="addModalTitle">Add new contact</div>
+      <div class="modal-sub" id="addModalSub">Pick the company first, then add the contact details.</div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Company section -->
+      <div class="modal-section" id="companySection">
+        <div class="modal-section-title"><span>Company<span class="info-tip" tabindex="0" aria-label="Why pick from a list">?<span class="info-tip-pop">We verify the company against Companies House so the registered name and number stay accurate. You can search by company name, reg number, or VAT number — if you enter a VAT number first, we'll find the matching company for you. <a href="#" onclick="event.preventDefault();">Learn more</a></span></span></span></div>
+        <div class="cs-search" id="csSearch">
+          <div class="cs-input-wrap">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            <input class="input" id="csInput" type="text" placeholder="Search by company name, reg number or VAT…" autocomplete="off" oninput="csSearchHandler()" onfocus="csSearchHandler()">
+          </div>
+          <div class="cs-results" id="csResults"></div>
+        </div>
+        <div id="csSelectedWrap" style="display:none;"></div>
+        <!-- Trading name — optional, only fill if used -->
+        <div class="field" id="tradingNameField" style="margin-top:12px;display:none;">
+          <label class="field-lbl" for="fTradingName">Trading name <span style="font-size:10px;font-weight:400;color:var(--text-3);margin-left:4px;">optional</span></label>
+          <div class="ta-field-wrap">
+            <input class="input" id="fTradingName" type="text" placeholder="Optional — add only if this company trades under a different name">
+          </div>
+          <div id="taSuggest" style="display:none;font-size:11px;color:var(--text-3);margin-top:5px;line-height:1.45;">
+            On the register as <span id="taSuggestName" style="color:var(--text-2);font-weight:500;font-style:italic;"></span> · <a href="#" onclick="event.preventDefault();useSuggestedTradingName();" style="color:var(--accent);font-weight:500;text-decoration:none;">Use this</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact section (now includes Notes) -->
+      <div class="modal-section disabled" id="contactSection">
+        <div class="modal-section-title">Contact</div>
+        <div class="modal-locked-hint">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="8" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+          Select a company above to unlock
+        </div>
+        <div class="field-row cols-2">
+          <div class="field"><label class="field-lbl" for="fName">Name<span class="req">*</span></label><input class="input" id="fName" type="text" placeholder="Full name"></div>
+          <div class="field"><label class="field-lbl" for="fRole">Role</label><input class="input" id="fRole" type="text" placeholder="e.g. Dispatcher"></div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field"><label class="field-lbl" for="fPhone">Phone<span class="req">*</span></label><input class="input" id="fPhone" type="tel" placeholder="+44 ..."></div>
+          <div class="field"><label class="field-lbl" for="fEmail">Email<span class="req">*</span></label><input class="input" id="fEmail" type="email" placeholder="name@company.co.uk"></div>
+        </div>
+        <div class="field"><label class="field-lbl" for="fNotes">Contact notes</label><textarea class="input" id="fNotes" placeholder="Payment terms, contract notes, customer-facing context."></textarea></div>
+      </div>
+
+      <!-- Address section -->
+      <div class="modal-section disabled" id="addressSection">
+        <div class="modal-section-title">Address</div>
+        <div class="modal-locked-hint">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="8" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+          Select a company above to unlock
+        </div>
+        <div class="addr-search" id="addrSearch">
+          <div class="addr-search-wrap">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            <input class="input" id="addrInput" type="text" placeholder="Search address — start typing a postcode, building or street…" autocomplete="off" oninput="addrSearchHandler()" onfocus="addrSearchHandler()">
+          </div>
+          <div class="addr-results" id="addrResults"></div>
+        </div>
+        <div class="field"><label class="field-lbl" for="fLine1">Address line 1<span class="req">*</span></label><input class="input" id="fLine1" type="text" placeholder="e.g. 14 Deansgate"></div>
+        <div class="field"><label class="field-lbl" for="fLine2">Address line 2</label><input class="input" id="fLine2" type="text" placeholder="Optional"></div>
+        <div class="field-row cols-2">
+          <div class="field"><label class="field-lbl" for="fTown">Town / City<span class="req">*</span></label><input class="input" id="fTown" type="text" placeholder="e.g. Manchester"></div>
+          <div class="field"><label class="field-lbl" for="fPostcode">Postcode<span class="req">*</span></label><input class="input" id="fPostcode" type="text" placeholder="e.g. M3 4LX"></div>
+        </div>
+        <div class="field"><label class="field-lbl" for="fCountry">Country</label>
+          <select class="input" id="fCountry">
+            <option>United Kingdom</option>
+            <option>Ireland</option>
+            <option>France</option>
+            <option>Germany</option>
+            <option>Netherlands</option>
+            <option>Belgium</option>
+            <option>Spain</option>
+            <option>Italy</option>
+          </select>
+        </div>
+        <div class="field"><label class="field-lbl" for="fW3W">What3Words</label>
+          <div class="w3w-input-wrap">
+            <span class="w3w-prefix">///</span>
+            <input class="input" id="fW3W" type="text" placeholder="e.g. daring.lion.race">
+          </div>
+        </div>
+        <div class="field"><label class="field-lbl" for="fAccess">Access notes</label><textarea class="input" id="fAccess" placeholder="Gate codes, HGV entrance, anything a driver needs on arrival."></textarea></div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <div class="foot-left">
+        <button class="btn-delete" id="deleteBtn" onclick="deleteContactClick()" style="display:none;" aria-label="Delete contact">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V4M5 4l.5 9a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5l.5-9M7 7v4M9 7v4"/></svg>
+          <span id="deleteBtnLabel">Delete contact</span>
+        </button>
+      </div>
+      <button class="btn" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveContact()" disabled>Save contact</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────
+// Today is 2026-04-27 (per env).
+// Risk lives on the company — every contact at the same company shares the company's risk.
+const COMPANIES = {
+  acme:       {name:'Acme Logistics Ltd',         ta:'Acme Freight Solutions', reg:'04512330', vat:'GB 812 4477 09', verifiedDate:'2026-01-15', risk:'low',  logo:{init:'AL',bg:'#E8F0F8',col:'#2563A8'}},
+  atlas:      {name:'Atlas Haulage Ltd',          ta:'',                       reg:'06231104', vat:'GB 945 1122 33', verifiedDate:'2025-08-20', risk:'med',  logo:{init:'AH',bg:'#FFF0D4',col:'#9B6310'}},
+  brindley:   {name:'Brindley Distribution Ltd',  ta:'Brindley Express',       reg:'03990228', vat:'GB 712 5544 66', verifiedDate:'2025-02-10', risk:'high', logo:{init:'BD',bg:'#E0F4EC',col:'#1A7A4A'}},
+  caledonian: {name:'Caledonian Transport plc',   ta:'',                       reg:'SC112456', vat:'GB 311 7788 99', verifiedDate:'2026-03-12', risk:'low',  logo:{init:'CT',bg:'#F0EBF8',col:'#6B3FA0'}},
+  midpoint:   {name:'Midpoint Freight Ltd',       ta:'Midpoint Logistics',     reg:'07845631', vat:'GB 622 3344 55', verifiedDate:'2024-06-04', risk:'med',  logo:{init:'MF',bg:'#FCE8E8',col:'#9B2828'}},
+  pennine:    {name:'Pennine Cargo Ltd',          ta:'',                       reg:'09124671', vat:'',               verifiedDate:'2026-04-30', risk:'low',  logo:{init:'PC',bg:'#E4F0E8',col:'#2A6B3C'}},
+  unverified: {name:'',                           ta:'',                       reg:'',         vat:'',               verifiedDate:'',           risk:'unv',  logo:{init:'?',bg:'#F0EDE6',col:'#A09A93'}}
+};
+// Single source of truth for risk: read from the company.
+function riskOf(c){
+  if(!c) return 'unv';
+  if(c.company === 'unverified') return 'unv';
+  return (COMPANIES[c.company] && COMPANIES[c.company].risk) || 'unv';
+}
+
+// Mock Companies House results — searched in the add-contact modal
+const COMPANIES_HOUSE = [
+  {key:'acme',       name:'Acme Logistics Ltd',          reg:'04512330', vat:'GB812447709',  addr:'14 Deansgate, Manchester, M3 4LX'},
+  {key:'atlas',      name:'Atlas Haulage Ltd',           reg:'06231104', vat:'GB945112233',  addr:'Parkway Trading Estate, Sheffield, S9 4WA'},
+  {key:'brindley',   name:'Brindley Distribution Ltd',   reg:'03990228', vat:'GB712554466',  addr:'Cross Green Approach, Leeds, LS9 0SA'},
+  {key:'caledonian', name:'Caledonian Transport plc',    reg:'SC112456', vat:'GB311778899',  addr:'Hillington Park, Glasgow, G52 4SG'},
+  {key:'midpoint',   name:'Midpoint Freight Ltd',        reg:'07845631', vat:'GB622334455',  addr:'Heath Mill Lane, Birmingham, B9 4AJ'},
+  {key:'_pennine',   name:'Pennine Cargo Ltd',           reg:'09124671', vat:'',             addr:'Mount Road, Leeds, LS6 4DG'},
+  {key:'_northstar', name:'Northstar Logistics UK Ltd',  reg:'12345678', vat:'GB222334455',  addr:'Quay Street, Liverpool, L3 4AF'},
+  {key:'_swiftway',  name:'Swiftway Transport Ltd',      reg:'11223344', vat:'GB188554499',  addr:'Trafford Park, Manchester, M17 1ED'},
+  {key:'_eastfield', name:'Eastfield Freight Ltd',       reg:'07881122', vat:'GB244556677',  addr:'Eastfield Road, Bristol, BS5 9AA'},
+  {key:'_acmeuk',    name:'Acme UK Holdings Ltd',        reg:'10998877', vat:'GB122998866',  addr:'71 Queen Victoria St, London, EC4V 4AY'},
+  {key:'_meridian',  name:'Meridian Pallets & Pack Ltd', reg:'08221103', vat:'GB477991128',  addr:'Meridian Way, Southampton, SO15 1HE'},
+  {key:'_thorne',    name:'Thorne & Sons Haulage Ltd',   reg:'06112299', vat:'GB100998811',  addr:'Thorne Park, Doncaster, DN8 5GA'}
+];
+
+// CONTACTS — sorted by surname.
+// Avatar palette is uniform blue everywhere — colour variation carried no meaning.
+const AV_BLUE = {bg:'#E8F0F8', col:'#2563A8'};
+const CONTACTS = [
+  {id:'evans', name:'Liam Evans', role:'Dispatcher', avatar:{init:'LE',...AV_BLUE},
+   company:'acme', risk:'low', phone:'0161 555 8122', email:'liam@acme.co.uk',
+   address:{line1:'14 Deansgate',line2:'',town:'Manchester',postcode:'M3 4LX',country:'United Kingdom'},
+   w3w:'daring.lion.race', notes:'',
+   access:'Gate code 4412#. HGV entrance is on Dock Rd East. Reception closes 17:00 — do not use the Oak St sat-nav pin.',
+   lastUsed:'08 Apr', days:19, lastInvoiced:'22 Apr 2026'},
+  {id:'gregor', name:'Dan Gregor', role:'Site foreman', avatar:{init:'DG',...AV_BLUE},
+   company:'acme', risk:'med', phone:'01204 555 010', email:'bolton@acme.co.uk',
+   address:{line1:'Unit 5, Lever Street',line2:'',town:'Bolton',postcode:'BL1 1QZ',country:'United Kingdom'},
+   w3w:'',
+   notes:'Bolton site — smaller depot, local deliveries only. Prefers calls Mon–Fri 07:00–16:00.',
+   access:'Single loading bay. Call ahead before arrival — yard is shared with the neighbouring unit.',
+   lastUsed:'12 Apr', days:15, lastInvoiced:'10 Apr 2026'},
+  {id:'khan', name:'Jamal Khan', role:'Operations manager', avatar:{init:'JK',...AV_BLUE},
+   company:'acme', risk:'low', phone:'0161 555 8100', email:'jamal@acme.co.uk',
+   address:{line1:'14 Deansgate',line2:'',town:'Manchester',postcode:'M3 4LX',country:'United Kingdom'},
+   w3w:'daring.lion.race',
+   notes:'Always copy Anja on emails. Owns the operational rota for the Manchester depot.',
+   access:'Gate code 4412#. HGV entrance is on Dock Rd East. Reception closes 17:00 — do not use the Oak St sat-nav pin.',
+   lastUsed:'14 Apr', days:13, lastInvoiced:'14 Apr 2026'},
+  {id:'lawson', name:'Ade Lawson', role:'Dispatcher', avatar:{init:'AL',...AV_BLUE},
+   company:'atlas', risk:'low', phone:'0114 555 8042', email:'ade.l@atlas-h.co.uk',
+   address:{line1:'Parkway Trading Estate',line2:'Brightside Lane',town:'Sheffield',postcode:'S9 4WA',country:'United Kingdom'},
+   w3w:'steady.shape.brave',
+   notes:'30-day payment terms.',
+   access:'',
+   lastUsed:'09 Apr', days:18, lastInvoiced:'01 Mar 2026'},
+  {id:'macleod', name:'K. MacLeod', role:'Depot manager', avatar:{init:'KM',...AV_BLUE},
+   company:'caledonian', risk:'low', phone:'0141 555 8033', email:'k.macleod@caledonian-t.co.uk',
+   address:{line1:'Hillington Park',line2:'Renfrew Road',town:'Glasgow',postcode:'G52 4SG',country:'United Kingdom'},
+   w3w:'mountain.river.proud',
+   notes:'Long-term contract since 2018. Annual review every January.',
+   access:'Hillington Park — check in at gate house. Photo ID required for first-time drivers.',
+   lastUsed:'02 Apr', days:25, lastInvoiced:'28 Mar 2026'},
+  {id:'muller', name:'Anja Müller', role:'Finance', avatar:{init:'AM',...AV_BLUE},
+   company:'acme', risk:'low', phone:'0161 555 8104', email:'finance@acme.co.uk',
+   address:{line1:'14 Deansgate',line2:'',town:'Manchester',postcode:'M3 4LX',country:'United Kingdom'},
+   w3w:'daring.lion.race',
+   notes:'Primary billing contact. Invoice monthly, PO required over £500. Contract renewal due Sept.',
+   access:'Gate code 4412#. HGV entrance is on Dock Rd East. Reception closes 17:00 — do not use the Oak St sat-nav pin.',
+   lastUsed:'14 Apr', days:13, lastInvoiced:'14 Apr 2026'},
+  {id:'norris', name:'Clare Norris', role:'Operations coordinator', avatar:{init:'CN',...AV_BLUE},
+   company:'pennine', risk:'low', phone:'01132 555 741', email:'c.norris@penninecargo.co.uk',
+   address:{line1:'Mount Road',line2:'',town:'Leeds',postcode:'LS6 4DG',country:'United Kingdom'},
+   w3w:'gentle.rain.oak',
+   notes:'Primary contact for all northbound loads. Prefer email first — response usually same day.',
+   access:'Mount Road yard — intercom at the main gate. Parking on the left.',
+   lastUsed:'18 Apr', days:9, lastInvoiced:'16 Apr 2026'},
+  {id:'nunez', name:'Pete Nunez', role:'Depot manager', avatar:{init:'PN',...AV_BLUE},
+   company:'pennine', risk:'low', phone:'01132 555 748', email:'pete@penninecargo.co.uk',
+   address:{line1:'Mount Road',line2:'',town:'Leeds',postcode:'LS6 4DG',country:'United Kingdom'},
+   w3w:'gentle.rain.oak',
+   notes:'',
+   access:'Mount Road yard — intercom at the main gate. Parking on the left.',
+   lastUsed:'22 Apr', days:5, lastInvoiced:'22 Apr 2026'},
+  {id:'obrien', name:"Jo O'Brien", role:'Driver', avatar:{init:'JO',...AV_BLUE},
+   company:'midpoint', risk:'med', phone:'0121 555 8071', email:'jo.obrien@midpoint.co.uk',
+   address:{line1:'Heath Mill Lane',line2:'Digbeth',town:'Birmingham',postcode:'B9 4AJ',country:'United Kingdom'},
+   w3w:'orange.field.crown',
+   notes:'',
+   access:'No access weekends. CCTV active.',
+   lastUsed:'02 Apr', days:25, lastInvoiced:''},
+  {id:'okafor', name:'S. Okafor', role:'Warehouse lead', avatar:{init:'SO',...AV_BLUE},
+   company:'midpoint', risk:'high', phone:'0121 555 8078', email:'s.okafor@midpoint.co.uk',
+   address:{line1:'Heath Mill Lane',line2:'Digbeth',town:'Birmingham',postcode:'B9 4AJ',country:'United Kingdom'},
+   w3w:'orange.field.crown',
+   notes:'High risk — verify all loads before dispatch. Discrepancies have been reported in the past quarter. Always count pallets before signing the manifest.',
+   access:'No access weekends. CCTV active.',
+   lastUsed:'24 Mar', days:33, lastInvoiced:'20 Mar 2026'},
+  {id:'price', name:'Sam Price', role:'Site foreman', avatar:{init:'SP',...AV_BLUE},
+   company:'brindley', risk:'med', phone:'0113 555 8180', email:'leeds@brindley.co.uk',
+   address:{line1:'Cross Green Approach',line2:'',town:'Leeds',postcode:'LS9 0SA',country:'United Kingdom'},
+   w3w:'',
+   notes:'Use Leeds depot for north-east deliveries. Sam is the on-site contact.',
+   access:'Cross Green Approach — HGV via south entrance only. Low bridge on the north approach.',
+   lastUsed:'05 Apr', days:22, lastInvoiced:'03 Apr 2026'},
+  {id:'rahman', name:'Mo Rahman', role:'Goods-in', avatar:{init:'MR',...AV_BLUE},
+   company:'brindley', risk:'high', phone:'0121 555 8200', email:'goods@brindley.co.uk',
+   address:{line1:'Tyseley Industrial Estate',line2:'Wharfdale Road',town:'Birmingham',postcode:'B11 2AQ',country:'United Kingdom'},
+   w3w:'quiet.shore.bench',
+   notes:'High risk — check invoices carefully before payment. Watch for changed bank details. Drivers must phone ahead — no walk-in access.',
+   access:'Tyseley gate locked after 18:00.',
+   lastUsed:'12 Apr', days:15, lastInvoiced:'11 Apr 2026'},
+  {id:'shah', name:'Priya Shah', role:'Account handler', avatar:{init:'PS',...AV_BLUE},
+   company:'acme', risk:'low', phone:'0161 555 8111', email:'priya@acme.co.uk',
+   address:{line1:'14 Deansgate',line2:'',town:'Manchester',postcode:'M3 4LX',country:'United Kingdom'},
+   w3w:'daring.lion.race',
+   notes:'Owns the customer relationship for Acme accounts billing.',
+   access:'',
+   lastUsed:'12 Apr', days:15, lastInvoiced:'12 Apr 2026'},
+  {id:'taylor', name:'Ron Taylor', role:'Driver (owner-op)', avatar:{init:'RT',...AV_BLUE},
+   company:'unverified', risk:'unv', phone:'07709 909 221', email:'ron.taylor@drivermail.co.uk',
+   address:{line1:'',line2:'',town:'',postcode:'',country:''},
+   w3w:'',
+   notes:'No company record. Add to a verified company before using on a load.',
+   access:'',
+   lastUsed:'', days:9999, lastInvoiced:''},
+  {id:'wells', name:'Tom Wells', role:'Transport manager', avatar:{init:'TW',...AV_BLUE},
+   company:'atlas', risk:'med', phone:'0114 555 8040', email:'tom@atlas-h.co.uk',
+   address:{line1:'Parkway Trading Estate',line2:'Brightside Lane',town:'Sheffield',postcode:'S9 4WA',country:'United Kingdom'},
+   w3w:'steady.shape.brave',
+   notes:'30-day payment terms. Owns transport scheduling — copy on driver issues.',
+   access:'Rear yard access via Parkway lane. Sign in at the small office on the right.',
+   lastUsed:'09 Apr', days:18, lastInvoiced:'07 Apr 2026'}
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────
+let activeRisks = new Set();
+let activeDateFilter = null;
+let fileByMode = 'company';
+let layout = 'flat';
+let expandedCompanyKey = 'acme';
+let selectedContactId = CONTACTS[0].id;
+let pendingCompany = null;
+let editingContactId = null; // null = add mode; otherwise editing this id
+
+
+
+const RISK_LABEL = {high:'High',med:'Medium',low:'Low',unv:'Unverified'};
+const RISK_LABEL_SHORT = {high:'High',med:'Med',low:'Low',unv:'Unverified'};
+
+// ─── HELPERS ───────────────────────────────────────────────────────
+const SVG_NOTES = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2h6L13 5v8.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5z"/><path d="M9.5 2v3h3.5M5.5 8h5M5.5 10.5h5M5.5 13h3"/></svg>';
+const SVG_ACCESS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="9" height="12" rx="1.5"/><path d="M5 5h4M5 8h3"/><path d="M12 9l2-2-1.5-1.5L10.5 7.5V9H12z"/></svg>';
+const SVG_ARCHIVE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v2H2zM3 6v8h10V6M6 9h4"/></svg>';
+
+function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function surnameOf(name){const p=(name||'').trim().split(/\s+/);return (p[p.length-1]||'').toLowerCase();}
+function initialsOf(name){
+  const p = (name||'').trim().split(/\s+/).filter(Boolean);
+  if(!p.length) return '?';
+  if(p.length === 1) return p[0].slice(0,2).toUpperCase();
+  return (p[0][0] + p[p.length-1][0]).toUpperCase();
+}
+function companyDisplayName(co){
+  if(co==='unverified') return '';
+  const c = COMPANIES[co];
+  return fileByMode==='trading' && c.ta ? c.ta : c.name;
+}
+function companyDisplayTa(co){
+  if(co==='unverified') return '';
+  const c = COMPANIES[co];
+  return fileByMode==='trading' ? '' : (c.ta ? 't/a '+c.ta : '');
+}
+function shortAddress(addr){
+  if(!addr || !addr.line1) return '';
+  return [addr.town, addr.postcode].filter(Boolean).join(' · ');
+}
+
+// Verification freshness — fixed 'today' so demo is stable
+const TODAY = new Date('2026-04-27');
+function verifStatus(coKey){
+  if(coKey === 'unverified') return null;
+  const co = COMPANIES[coKey];
+  if(!co.verifiedDate) return null;
+  return {dateStr:co.verifiedDate};
+}
+function fmtVerifiedOn(dateStr){
+  const d = new Date(dateStr);
+  if(isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+}
+
+function siblingsOf(c){
+  if(c.company === 'unverified') return [];
+  return CONTACTS.filter(x => x.company === c.company && x.id !== c.id);
+}
+
+// ─── FLAT VIEW RENDER ──────────────────────────────────────────────
+function renderFlat(filtered){
+  const tbody = document.getElementById('flat-tbody');
+  if(!filtered.length){
+    tbody.innerHTML = '<tr><td colspan="10" class="no-results-cell"><strong>No results found</strong><br>Try a different name or adjust your filters</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(c => {
+    const co = COMPANIES[c.company];
+    const isUnv = c.company === 'unverified';
+    const companyHtml = isUnv
+      ? '<span class="company-unv">Unverified — no company</span>'
+      : `<div class="company-cell">
+          <div class="company-info">
+            <div class="company-name">${escapeHtml(companyDisplayName(c.company))}</div>
+            ${companyDisplayTa(c.company)?`<div class="company-ta">${escapeHtml(companyDisplayTa(c.company))}</div>`:''}
+          </div>
+        </div>`;
+    const addressHtml = c.address.line1
+      ? `<div class="addr-line1">${escapeHtml(c.address.line1)}</div><div class="addr-line2">${escapeHtml(shortAddress(c.address))}</div>`
+      : '<span class="cell-dash">—</span>';
+    const emailHtml = c.email
+      ? `<a class="email-link" href="#" onclick="event.stopPropagation()">${escapeHtml(c.email)}</a>`
+      : '<span class="cell-dash">—</span>';
+    const usedHtml = c.lastUsed
+      ? `<div class="used-date">${escapeHtml(c.lastUsed)}</div>`
+      : '<div class="used-never">not used</div>';
+    const invoicedHtml = c.lastInvoiced
+      ? `<a class="invoiced-link" href="https://smartpay.neste.com/invoices?contact=${encodeURIComponent(c.id)}" target="_blank" onclick="event.stopPropagation()" title="View in SmartPay">${escapeHtml(c.lastInvoiced)}</a>`
+      : '<div class="invoiced-never">—</div>';
+    const w3wHtml = c.w3w
+      ? `<span class="icon-btn"><span class="w3w-mark">///</span><span class="tt"><span class="tt-title">What3Words</span><span class="tt-w3w-line"><span class="mk">///</span>${escapeHtml(c.w3w)}</span></span></span>`
+      : `<span class="icon-btn empty"><span class="w3w-mark">///</span><span class="tt"><span class="tt-title">What3Words</span><span class="tt-empty">No location on file.</span></span></span>`;
+    const notesHtml = c.notes
+      ? `<span class="icon-btn">${SVG_NOTES}<span class="tt"><span class="tt-title">Contact notes</span>${escapeHtml(c.notes)}</span></span>`
+      : `<span class="icon-btn empty">${SVG_NOTES}<span class="tt"><span class="tt-title">Contact notes</span><span class="tt-empty">No notes added.</span></span></span>`;
+    const accessHtml = c.access
+      ? `<span class="icon-btn">${SVG_ACCESS}<span class="tt"><span class="tt-title">Access notes</span>${escapeHtml(c.access)}</span></span>`
+      : `<span class="icon-btn empty">${SVG_ACCESS}<span class="tt"><span class="tt-title">Access notes</span><span class="tt-empty">No access notes on file.</span></span></span>`;
+
+    const r = riskOf(c);
+    return `<tr data-id="${c.id}" data-risk="${r}" data-days="${c.days}" onclick="selectAndOpen('${c.id}')">
+      <td><div class="contact-cell"><div class="avatar" style="background:${c.avatar.bg};color:${c.avatar.col};">${c.avatar.init}</div><div><div class="contact-name">${escapeHtml(c.name)}</div><div class="contact-role">${escapeHtml(c.role)}</div></div></div></td>
+      <td>${companyHtml}</td>
+      <td>${addressHtml}</td>
+      <td class="icon-td">${w3wHtml}</td>
+      <td class="icon-td">${accessHtml}</td>
+      <td><div class="phone">${escapeHtml(c.phone)||'<span class=cell-dash>—</span>'}</div></td>
+      <td>${emailHtml}</td>
+      <td class="icon-td">${notesHtml}</td>
+      <td>${usedHtml}</td>
+      <td>${invoicedHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── SPLIT VIEW RENDER ─────────────────────────────────────────────
+function renderSplitList(filtered){
+  const list = document.getElementById('split-list');
+  const countEl = document.getElementById('splitListCount');
+  const subEl = document.getElementById('splitListSub');
+  const banner = document.getElementById('splitCoBanner');
+  const coLogo = document.getElementById('splitCoLogo');
+  const coName = document.getElementById('splitCoName');
+  const coCount = document.getElementById('splitCoCount');
+
+  // If a contact is selected and has a company, show only that company's contacts
+  const sel = CONTACTS.find(x => x.id === selectedContactId);
+  let listContacts;
+  if(sel && sel.company !== 'unverified'){
+    const co = COMPANIES[sel.company];
+    listContacts = CONTACTS.filter(c => c.company === sel.company);
+    // Company banner
+    banner.style.display = 'block';
+    coLogo.style.cssText = `background:${co.logo.bg};color:${co.logo.col};`;
+    coLogo.textContent = co.logo.init;
+    coName.textContent = co.name;
+    coCount.textContent = `${listContacts.length} contact${listContacts.length===1?'':'s'}`;
+    if(countEl) countEl.textContent = `${listContacts.length} contact${listContacts.length===1?'':'s'}`;
+    if(subEl) subEl.textContent = 'AT THIS COMPANY';
+  } else {
+    listContacts = filtered;
+    banner.style.display = 'none';
+    if(countEl) countEl.textContent = `${filtered.length} contact${filtered.length===1?'':'s'}`;
+    if(subEl) subEl.textContent = 'ALL CONTACTS';
+  }
+
+  if(!listContacts.length){
+    list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-3);font-size:12px;"><strong style="display:block;color:var(--text-2);margin-bottom:6px;font-size:13px;">No results</strong>Try a different search or filter</div>';
+    return;
+  }
+  list.innerHTML = listContacts.map(c => {
+    const isActive = c.id === selectedContactId;
+    const r = riskOf(c);
+    return `<div class="sli${isActive?' active':''}" data-id="${c.id}" onclick="selectContact('${c.id}')">
+      <div class="sli-av" style="background:${c.avatar.bg};color:${c.avatar.col};">${c.avatar.init}</div>
+      <div class="sli-info">
+        <div class="sli-name">${escapeHtml(c.name)}</div>
+        <div class="sli-meta">${escapeHtml(c.role)}</div>
+        <div class="sli-phone">${escapeHtml(c.phone)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSplitDetail(){
+  const detail = document.getElementById('split-detail');
+  const c = CONTACTS.find(x => x.id === selectedContactId);
+  if(!c){
+    detail.innerHTML = '<div class="sd-empty"><strong>Select a contact</strong>Choose a contact from the list to see details.</div>';
+    return;
+  }
+  const co = COMPANIES[c.company];
+  const isUnv = c.company === 'unverified';
+  const verif = isUnv ? null : verifStatus(c.company);
+
+  // Verification UI inside company card
+  let verifHtml = '';
+  if(verif){
+    verifHtml = `<div class="verif-row"><span class="verif-fresh"><span class="tk">✓</span> Verified</span><span class="verif-detail">${escapeHtml(fmtVerifiedOn(verif.dateStr))}</span></div>`;
+  }
+
+  const r = riskOf(c);
+  const companyCard = isUnv
+    ? `<div class="sd-comp-empty">Unverified contact — no company record on file.</div>`
+    : `<div class="sd-comp-card">
+        <div class="sd-comp-info">
+          <div class="sd-comp-name">${escapeHtml(co.name)}</div>
+          ${co.ta?`<div class="sd-comp-ta">t/a ${escapeHtml(co.ta)}</div>`:''}
+          <div class="sd-comp-meta">
+            <span><span class="k">Reg</span>${escapeHtml(co.reg)}</span>
+            ${co.vat ? `<span><span class="k">VAT</span>${escapeHtml(co.vat)}</span>` : `<span style="color:var(--text-3);font-style:italic;">VAT not recorded</span>`}
+          </div>
+          ${verifHtml}
+        </div>
+      </div>`;
+
+  // Address grid (5 fields)
+  const addrEmpty = !c.address.line1 && !c.address.town && !c.address.postcode;
+  const addressGrid = addrEmpty
+    ? `<div class="sd-notes-empty">No address on file.</div>`
+    : `<div class="sd-addr-grid">
+        <div class="sd-addr-field full"><span class="sd-addr-lbl">Address line 1</span><div class="sd-addr-val${c.address.line1?'':' empty'}">${c.address.line1?escapeHtml(c.address.line1):'—'}</div></div>
+        <div class="sd-addr-field full"><span class="sd-addr-lbl">Address line 2</span><div class="sd-addr-val${c.address.line2?'':' empty'}">${c.address.line2?escapeHtml(c.address.line2):'—'}</div></div>
+        <div class="sd-addr-field"><span class="sd-addr-lbl">Town / City</span><div class="sd-addr-val${c.address.town?'':' empty'}">${c.address.town?escapeHtml(c.address.town):'—'}</div></div>
+        <div class="sd-addr-field"><span class="sd-addr-lbl">Postcode</span><div class="sd-addr-val${c.address.postcode?'':' empty'}">${c.address.postcode?escapeHtml(c.address.postcode):'—'}</div></div>
+        <div class="sd-addr-field full"><span class="sd-addr-lbl">Country</span><div class="sd-addr-val${c.address.country?'':' empty'}">${c.address.country?escapeHtml(c.address.country):'—'}</div></div>
+       </div>`;
+
+  // Sibling contacts — now rendered in left panel, not in detail
+  const sibSection = '';
+
+  detail.innerHTML = `
+    <div class="sd-breadcrumb">
+      <button class="sd-back" onclick="setLayout('company')" aria-label="Back to all contacts">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3L5 8l5 5"/></svg>
+        Back to all contacts
+      </button>
+      <div class="sd-breadcrumb-trail">
+        Contacts<span class="crumb-sep">›</span>${isUnv?'Unverified':escapeHtml(co.name)}<span class="crumb-sep">›</span><span class="crumb-current">${escapeHtml(c.name)}</span>
+      </div>
+    </div>
+    <div class="sd-header">
+      <div class="sd-header-row">
+        <div class="sd-av" style="background:${c.avatar.bg};color:${c.avatar.col};">${c.avatar.init}</div>
+        <div class="sd-h-info">
+          <div class="sd-name">${escapeHtml(c.name)}</div>
+          <div class="sd-role">${escapeHtml(c.role)}${isUnv?'':` · ${escapeHtml(co.name)}`}</div>
+        </div>
+        <div class="sd-h-right">
+          ${c.lastUsed?`<span class="sd-last-used">Last used ${escapeHtml(c.lastUsed)}</span>`:`<span class="sd-last-used">Not yet used</span>`}
+        </div>
+      </div>
+      <div class="sd-actions">
+        <button class="btn btn-sm" onclick="openEditModal('${c.id}')">✎ Edit contact</button>
+        ${isUnv?'':`<button class="btn btn-sm" onclick="openAddModal('${c.company}')">+ Add contact at ${escapeHtml(co.name).split(' ')[0]}</button>`}
+        ${!isUnv && c.email
+          ? ''
+          : ''}
+      </div>
+    </div>
+    <div class="sd-body">
+
+      <!-- Company (with risk + verification) -->
+      <div class="sd-section">
+        <div class="sd-sec-title">Company</div>
+        ${companyCard}
+      </div>
+
+      <!-- Contact (now includes notes) -->
+      <div class="sd-section">
+        <div class="sd-sec-title">Contact<button class="sd-sec-action" onclick="openEditModal('${c.id}')">✎ Edit</button></div>
+        <div class="sd-field"><div class="sd-field-lbl">Phone</div><div class="sd-field-val">${escapeHtml(c.phone)||'<span class=cell-dash>—</span>'}</div></div>
+        <div class="sd-field"><div class="sd-field-lbl">Email</div><div class="sd-field-val em">${c.email?escapeHtml(c.email):'<span class=cell-dash>—</span>'}</div></div>
+        <div class="sd-field"><div class="sd-field-lbl">Last inv.</div><div class="sd-field-val">${c.lastInvoiced?`<a href="https://smartpay.neste.com/invoices?contact=${encodeURIComponent(c.id)}" target="_blank" style="color:#2563A8;text-decoration:none;font-size:12.5px;" title="View in SmartPay">${escapeHtml(c.lastInvoiced)} ↗</a>`:'<span style="color:var(--text-3);font-style:italic;font-size:12px;">No invoices</span>'}</div></div>
+        <div class="sd-sub-title" style="margin-top:11px;">Contact notes</div>
+        ${c.notes
+          ? `<div class="sd-notes-text">${escapeHtml(c.notes)}</div>`
+          : `<div class="sd-notes-empty">No contact notes added yet.</div>`}
+      </div>
+
+      <!-- Address (renamed from Address & access) -->
+      <div class="sd-section full">
+        <div class="sd-sec-title">Address<button class="sd-sec-action" onclick="openEditModal('${c.id}')">✎ Edit</button></div>
+        ${addressGrid}
+
+        <div class="sd-sub-title">What3Words</div>
+        ${c.w3w
+          ? `<div class="sd-w3w"><span class="sd-w3w-mark">///</span><span class="sd-w3w-addr">${escapeHtml(c.w3w)}</span><button class="sd-w3w-copy" onclick="copyW3W('${escapeHtml(c.w3w)}',this)">Copy</button></div>`
+          : `<div class="sd-w3w-empty">No What3Words location on file.</div>`}
+
+        <div class="sd-sub-title">Access notes</div>
+        ${c.access
+          ? `<div class="sd-notes-text">${escapeHtml(c.access)}</div>`
+          : `<div class="sd-notes-empty">No access notes on file.</div>`}
+      </div>
+
+      <!-- Sibling contacts -->
+      ${sibSection}
+
+    </div>
+  `;
+  // After render: hook up the sibling scroller (legacy)
+  setTimeout(updateSibScrollUI, 0);
+}
+
+function sibScroll(dir){
+  const grid = document.getElementById('sibGrid');
+  if(!grid) return;
+  // Scroll by ~one card width + gap
+  const step = 240 + 9;
+  grid.scrollBy({left: dir * step * 2, behavior:'smooth'});
+}
+
+function updateSibScrollUI(){
+  const wrap = document.getElementById('sibScrollWrap');
+  const grid = document.getElementById('sibGrid');
+  const prev = document.getElementById('sibNavPrev');
+  const next = document.getElementById('sibNavNext');
+  if(!wrap || !grid || !prev || !next) return;
+  const overflow = grid.scrollWidth > grid.clientWidth + 2;
+  if(!overflow){
+    prev.classList.remove('show'); next.classList.remove('show');
+    wrap.classList.remove('fade-left','fade-right');
+    return;
+  }
+  const sync = () => {
+    const atStart = grid.scrollLeft <= 2;
+    const atEnd = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 2;
+    prev.classList.toggle('show', !atStart);
+    next.classList.toggle('show', !atEnd);
+    wrap.classList.toggle('fade-left', !atStart);
+    wrap.classList.toggle('fade-right', !atEnd);
+  };
+  sync();
+  grid.onscroll = sync;
+  // Re-evaluate on resize
+  if(!updateSibScrollUI._resizeBound){
+    window.addEventListener('resize', () => {
+      const g = document.getElementById('sibGrid');
+      if(g) updateSibScrollUI();
+    });
+    updateSibScrollUI._resizeBound = true;
+  }
+}
+
+// ─── COMPANY VIEW (flat expandable list) ────────────────────────────
+function renderCompanyFlatList(){
+  const container = document.getElementById('co-flat-list');
+  if(!container) return;
+  const keys = Object.keys(COMPANIES).filter(k => k !== 'unverified').sort((a,b) => COMPANIES[a].name.localeCompare(COMPANIES[b].name));
+  container.innerHTML = keys.map(key => {
+    const co = COMPANIES[key];
+    const contacts = CONTACTS.filter(c => c.company === key);
+    const isOpen = key === expandedCompanyKey;
+    const verif = verifStatus(key);
+    const verifHtml = verif ? `<span class="co-row-verif"><span>✓</span> Verified ${escapeHtml(fmtVerifiedOn(verif.dateStr))}</span>` : '';
+
+    const contactRows = contacts.map(c => `
+      <div class="co-contact-row" onclick="selectAndOpen('${c.id}')">
+        <div class="ccr-av" style="background:${c.avatar.bg};color:${c.avatar.col};">${c.avatar.init}</div>
+        <div class="ccr-info">
+          <div class="ccr-name">${escapeHtml(c.name)}</div>
+          <div class="ccr-role">${escapeHtml(c.role)}</div>
+          <div class="ccr-contact">${escapeHtml(c.phone)}${c.email ? ` · ${escapeHtml(c.email)}` : ''}</div>
+        </div>
+        <div class="ccr-right">
+          <div class="ccr-invoiced-wrap">
+            <div class="ccr-invoiced-lbl">Last invoiced</div>
+            ${c.lastInvoiced
+              ? `<a class="ccr-invoiced" href="https://smartpay.neste.com/invoices?contact=${encodeURIComponent(c.id)}" target="_blank" onclick="event.stopPropagation()" title="Last invoiced in SmartPay">${escapeHtml(c.lastInvoiced)} ↗</a>`
+              : `<span class="ccr-no-invoice">None</span>`}
+          </div>
+        </div>
+      </div>`).join('');
+
+    const addRow = `<div class="co-add-row"><a href="#" onclick="event.preventDefault();openAddModal('${key}')" style="font-size:12px;color:var(--accent);font-weight:500;text-decoration:none;">+ Add contact at ${escapeHtml(co.name.split(' ')[0])}</a></div>`;
+
+    return `<div class="co-row" data-key="${key}">
+      <div class="co-row-head${isOpen?' open':''}" onclick="toggleCompanyRow('${key}')">
+        <div class="co-row-logo" style="background:${co.logo.bg};color:${co.logo.col};">${co.logo.init}</div>
+        <div class="co-row-info">
+          <div class="co-row-name">${escapeHtml(co.name)}${co.ta?`<span style="font-size:11px;color:var(--text-3);font-style:italic;font-weight:400;margin-left:7px;">t/a ${escapeHtml(co.ta)}</span>`:''}</div>
+          <div class="co-row-sub"><span style="color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;font-size:9px;margin-right:4px;">REG</span>${escapeHtml(co.reg)}${co.vat ? `<span style="margin:0 6px;color:var(--border);">·</span><span style="color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;font-size:9px;margin-right:4px;">VAT</span>${escapeHtml(co.vat)}` : ''}</div>
+        </div>
+        <div class="co-row-right">
+          <span class="co-row-count">${contacts.length} contact${contacts.length===1?'':'s'}</span>
+          <svg class="co-row-caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3l5 5-5 5"/></svg>
+        </div>
+      </div>
+      <div class="co-contacts-wrap${isOpen?' open':''}">
+        ${contacts.length === 0
+          ? `<div style="padding:12px 18px 12px 65px;font-size:12px;color:var(--text-3);font-style:italic;">No contacts yet.</div>`
+          : contactRows}
+        ${addRow}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCompanyRow(key){
+  expandedCompanyKey = (expandedCompanyKey === key) ? null : key;
+  renderCompanyFlatList();
+}
+
+
+function getFiltered(){
+  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  return CONTACTS.filter(c => {
+    const co = COMPANIES[c.company];
+    const matchSearch = !q
+      || c.name.toLowerCase().includes(q)
+      || (c.role||'').toLowerCase().includes(q)
+      || (co.name||'').toLowerCase().includes(q)
+      || (co.ta||'').toLowerCase().includes(q)
+      || (c.phone||'').toLowerCase().includes(q)
+      || (c.email||'').toLowerCase().includes(q)
+      || (c.address?.town||'').toLowerCase().includes(q)
+      || (c.address?.postcode||'').toLowerCase().replace(/\s+/g,'').includes(q.replace(/\s+/g,''));
+    const matchRisk = activeRisks.size === 0 || activeRisks.has(riskOf(c));
+    let matchDate = true;
+    if(activeDateFilter === 'never') matchDate = c.days === 9999;
+    else if(activeDateFilter) matchDate = c.days <= parseInt(activeDateFilter);
+    return matchSearch && matchRisk && matchDate;
+  });
+}
+
+function applyFilters(){
+  let filtered = getFiltered();
+  renderFlat(filtered);
+  renderSplitList(filtered);
+  if(filtered.length && !filtered.find(c => c.id === selectedContactId)){
+    selectedContactId = filtered[0].id;
+  } else if(!filtered.length) {
+    selectedContactId = null;
+  }
+  renderSplitDetail();
+  updateActiveFiltersBar();
+  document.getElementById('pgMeta').textContent = `Showing ${filtered.length} of 247 · page 1 of 19`;
+  document.getElementById('listMeta').textContent = `${CONTACTS.length} contacts · ${Object.keys(COMPANIES).filter(k=>k!=='unverified').length} companies (sample)`;
+}
+
+// ─── LAYOUT TOGGLE ─────────────────────────────────────────────────
+function setLayout(l){
+  layout = l;
+  document.querySelectorAll('.lt-btn').forEach(b => b.classList.toggle('active', b.dataset.layout === l));
+  document.querySelectorAll('.view-flat,.view-split,.view-company').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + l).classList.add('active');
+  if(l === 'split') renderSplitDetail();
+  if(l === 'company') renderCompanyFlatList();
+}
+
+// ─── CONTACT SELECTION ─────────────────────────────────────────────
+function selectContact(id){
+  selectedContactId = id;
+  document.querySelectorAll('.sli').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+  document.querySelectorAll('.flat-table tbody tr').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+  renderSplitDetail();
+  // Bring the active item into view in the split list
+  const sel = document.querySelector('.sli.active');
+  if(sel && sel.scrollIntoView) sel.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function selectAndOpen(id){selectContact(id); setLayout('split');}
+
+// ─── FILE-BY (company / trading) ───────────────────────────────────
+function setFileBy(mode, btn){
+  fileByMode = mode;
+  document.querySelectorAll('.ftog').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+// ─── PANELS / FILTER UI ────────────────────────────────────────────
+function togglePanel(id){
+  const p = document.getElementById(id);
+  const o = p.classList.contains('open');
+  document.querySelectorAll('.flt-panel').forEach(x => x.classList.remove('open'));
+  if(!o) p.classList.add('open');
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('.flt-wrap')) document.querySelectorAll('.flt-panel').forEach(p => p.classList.remove('open'));
+  if(!e.target.closest('.cs-search') && !e.target.closest('.cs-results')){
+    const r = document.getElementById('csResults');
+    if(r) r.classList.remove('open');
+  }
+  if(!e.target.closest('.addr-search') && !e.target.closest('.addr-results')){
+    const r = document.getElementById('addrResults');
+    if(r) r.classList.remove('open');
+  }
+});
+
+function toggleRisk(risk, el){
+  el.classList.toggle('selected');
+  el.querySelector('.flt-check').textContent = el.classList.contains('selected') ? '✓' : '';
+  if(el.classList.contains('selected')) activeRisks.add(risk); else activeRisks.delete(risk);
+  updateRiskBtn();
+  applyFilters();
+}
+function updateRiskBtn(){
+  const btn = document.getElementById('riskBtn');
+  if(activeRisks.size){
+    btn.classList.add('has-value');
+    btn.querySelector('span').textContent = [...activeRisks].map(r => RISK_LABEL_SHORT[r]).join(', ');
+  } else {
+    btn.classList.remove('has-value');
+    btn.querySelector('span').textContent = 'Risk';
+  }
+}
+function clearRisk(){
+  activeRisks.clear();
+  document.querySelectorAll('#riskPanel .flt-option').forEach(o => {o.classList.remove('selected'); o.querySelector('.flt-check').textContent = '';});
+  updateRiskBtn();
+  applyFilters();
+}
+
+const dateLabels = {'7':'Last 7 days','30':'Last 30 days','90':'Last 90 days','never':'Never used'};
+function selectDate(val, el){
+  document.querySelectorAll('#datePanel .flt-option').forEach(o => {o.classList.remove('selected'); o.querySelector('.flt-check').textContent = '';});
+  if(activeDateFilter === val){activeDateFilter = null; updateDateBtn(); applyFilters(); return;}
+  activeDateFilter = val;
+  el.classList.add('selected');
+  el.querySelector('.flt-check').textContent = '✓';
+  updateDateBtn();
+  applyFilters();
+}
+function updateDateBtn(){
+  const btn = document.getElementById('dateBtn');
+  if(activeDateFilter){btn.classList.add('has-value'); btn.querySelector('span').textContent = dateLabels[activeDateFilter];}
+  else {btn.classList.remove('has-value'); btn.querySelector('span').textContent = 'Last used';}
+}
+function clearDate(){
+  activeDateFilter = null;
+  document.querySelectorAll('#datePanel .flt-option').forEach(o => {o.classList.remove('selected'); o.querySelector('.flt-check').textContent = '';});
+  updateDateBtn();
+  applyFilters();
+}
+
+function updateActiveFiltersBar(){
+  const bar = document.getElementById('activeFilters');
+  const chips = document.getElementById('af-chips');
+  const hasFilters = activeRisks.size > 0 || activeDateFilter;
+  if(!hasFilters){bar.classList.remove('visible'); return;}
+  bar.classList.add('visible');
+  const rc = {high:'var(--risk-high)',med:'var(--risk-med)',low:'var(--risk-low)',unv:'var(--risk-unv)'};
+  const rl = {high:'High risk',med:'Medium risk',low:'Low risk',unv:'Unverified'};
+  let html = '';
+  activeRisks.forEach(r => {
+    html += `<span class="af-chip" style="color:${rc[r]};border-color:${rc[r]};">${rl[r]} <button onclick="toggleRisk('${r}',document.querySelector('[data-risk=\\'${r}\\']'))">✕</button></span>`;
+  });
+  if(activeDateFilter){
+    html += `<span class="af-chip">${dateLabels[activeDateFilter]} <button onclick="clearDate()">✕</button></span>`;
+  }
+  chips.innerHTML = html;
+}
+function clearAllFilters(){
+  clearRisk(); clearDate();
+  document.getElementById('searchInput').value = '';
+  applyFilters();
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+// ─── ADD / EDIT CONTACT MODAL ──────────────────────────────────────
+function openAddModal(prefilledCompanyKey){
+  editingContactId = null;
+  resetAddForm();
+  document.getElementById('addModalTitle').textContent = 'Add new contact';
+  document.getElementById('addModalSub').textContent = "Pick the company first, then add the contact details.";
+  document.getElementById('saveBtn').textContent = 'Save contact';
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('addModal').classList.add('show');
+  if(prefilledCompanyKey && COMPANIES[prefilledCompanyKey]){
+    const co = COMPANIES[prefilledCompanyKey];
+    selectCompaniesHouse({key: prefilledCompanyKey, name: co.name, reg: co.reg, addr: ''});
+  } else {
+    setTimeout(() => document.getElementById('csInput').focus(), 100);
+  }
+}
+
+function openEditModal(id){
+  const c = CONTACTS.find(x => x.id === id);
+  if(!c) return;
+  editingContactId = id;
+  resetAddForm();
+  document.getElementById('addModalTitle').textContent = 'Edit contact';
+  document.getElementById('addModalSub').textContent = 'Update this contact. The company cannot be changed here.';
+  document.getElementById('saveBtn').textContent = 'Save changes';
+  // Show delete button (subtle) only in edit mode
+  const delBtn = document.getElementById('deleteBtn');
+  delBtn.style.display = 'inline-flex';
+  delBtn.classList.remove('confirm');
+  document.getElementById('deleteBtnLabel').textContent = 'Delete contact';
+  document.getElementById('addModal').classList.add('show');
+
+  // If unverified, allow company search; else lock to current company
+  if(c.company === 'unverified'){
+    setTimeout(() => document.getElementById('csInput').focus(), 100);
+  } else {
+    const co = COMPANIES[c.company];
+    selectCompaniesHouse({key: c.company, name: co.name, reg: co.reg, addr: ''}, /*lockChange*/true);
+  }
+  // Pre-fill fields
+  document.getElementById('fName').value = c.name;
+  document.getElementById('fRole').value = c.role === '—' ? '' : c.role;
+  document.getElementById('fPhone').value = c.phone;
+  document.getElementById('fEmail').value = c.email;
+  document.getElementById('fNotes').value = c.notes;
+  document.getElementById('fLine1').value = c.address.line1 || '';
+  document.getElementById('fLine2').value = c.address.line2 || '';
+  document.getElementById('fTown').value = c.address.town || '';
+  document.getElementById('fPostcode').value = c.address.postcode || '';
+  document.getElementById('fCountry').value = c.address.country || 'United Kingdom';
+  document.getElementById('fW3W').value = c.w3w || '';
+  document.getElementById('fAccess').value = c.access || '';
+  setTimeout(() => document.getElementById('fName').focus(), 100);
+}
+
+function useSuggestedTradingName(){
+  const taInput = document.getElementById('fTradingName');
+  const taSuggestName = document.getElementById('taSuggestName');
+  const taSuggest = document.getElementById('taSuggest');
+  if(taInput && taSuggestName){ taInput.value = taSuggestName.textContent; }
+  if(taSuggest) taSuggest.style.display = 'none';
+}
+
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('show');
+}
+function resetAddForm(){
+  pendingCompany = null;
+  ['fName','fRole','fPhone','fEmail','fLine1','fLine2','fTown','fPostcode','fW3W','fAccess','fNotes','csInput','addrInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  // Reset trading name (always blank — optional add)
+  const taInput = document.getElementById('fTradingName');
+  const taField = document.getElementById('tradingNameField');
+  const taSuggest = document.getElementById('taSuggest');
+  if(taInput){ taInput.value=''; }
+  if(taField) taField.style.display = 'none';
+  if(taSuggest) taSuggest.style.display = 'none';
+  document.getElementById('fCountry').value = 'United Kingdom';
+  document.getElementById('csResults').classList.remove('open');
+  document.getElementById('csResults').innerHTML = '';
+  document.getElementById('csSelectedWrap').style.display = 'none';
+  document.getElementById('csSelectedWrap').innerHTML = '';
+  document.getElementById('csSearch').style.display = 'block';
+  const ar = document.getElementById('addrResults');
+  if(ar){ar.classList.remove('open'); ar.innerHTML = '';}
+  ['contactSection','addressSection'].forEach(s => document.getElementById(s).classList.add('disabled'));
+  document.getElementById('saveBtn').disabled = true;
+}
+
+function isVatLike(q){
+  return /^gb[\s\d]/i.test(q) || /^\d{9}$/.test(q.replace(/\s/g,''));
+}
+
+function csSearchHandler(){
+  const q = (document.getElementById('csInput').value||'').toLowerCase().trim();
+  const results = document.getElementById('csResults');
+  if(!q){results.classList.remove('open'); return;}
+  const qNorm = q.replace(/\s+/g,'');
+
+  // VAT-first flow
+  if(isVatLike(q)){
+    const vatMatches = COMPANIES_HOUSE.filter(c =>
+      c.vat && c.vat.toLowerCase().replace(/\s+/g,'').includes(qNorm)
+    ).slice(0,6);
+    if(!vatMatches.length){
+      results.innerHTML = `<div class="cs-empty"><strong>No company found for this VAT number</strong>Try searching by company name or reg number instead.<div class="cs-manual-link">Can't find it? <a href="#" onclick="event.preventDefault();addManualCompany('')">Add company manually</a></div></div>`;
+    } else {
+      results.innerHTML = `<div class="cs-vat-hint"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8l2 2 3-3"/></svg>VAT number matched — select the company to confirm</div>` +
+        vatMatches.map((m,i) => `
+          <div class="cs-result" onclick="selectFromVatList(${i})">
+            <div class="cs-result-name">${escapeHtml(m.name)}</div>
+            <div class="cs-result-meta">Reg ${escapeHtml(m.reg)}</div>
+            <div class="cs-result-addr">${escapeHtml(m.addr)}</div>
+          </div>
+        `).join('');
+      results._vatMatches = vatMatches;
+      results._vatUsed = q;
+    }
+    results.classList.add('open');
+    return;
+  }
+
+  // Name / reg search
+  const matches = COMPANIES_HOUSE.filter(c =>
+    c.name.toLowerCase().includes(q) || c.reg.toLowerCase().includes(q)
+  ).slice(0,6);
+  if(!matches.length){
+    results.innerHTML = `<div class="cs-empty"><strong>No matches found</strong>Try a different name or registration number.<div class="cs-manual-link">Can't find it? <a href="#" onclick="event.preventDefault();addManualCompany(document.getElementById('csInput').value)">Add company manually</a></div></div>`;
+  } else {
+    results.innerHTML = matches.map((m,i) => `
+      <div class="cs-result" data-idx="${i}" onclick="selectFromList(${i})">
+        <div class="cs-result-name">${escapeHtml(m.name)}</div>
+        <div class="cs-result-meta">Reg ${escapeHtml(m.reg)}</div>
+        <div class="cs-result-addr">${escapeHtml(m.addr)}</div>
+      </div>
+    `).join('');
+    results._matches = matches;
+  }
+  results.classList.add('open');
+}
+
+function selectFromList(idx){
+  const r = document.getElementById('csResults');
+  const m = r._matches && r._matches[idx];
+  if(m) selectCompaniesHouse(m);
+}
+
+function lockVatIfFilled(el){
+  if(el.value.trim()){
+    el.setAttribute('readonly', true);
+    el.classList.add('cs-vat-locked');
+  }
+}
+
+function selectFromVatList(idx){
+  const r = document.getElementById('csResults');
+  const m = r._vatMatches && r._vatMatches[idx];
+  if(!m) return;
+  // Carry the VAT the user typed into the VAT field after company is selected
+  selectCompaniesHouse(m, false, r._vatUsed);
+}
+
+function addManualCompany(prefill){
+  const name = (prefill||'').trim();
+  // Build a manual (unverified-by-CH) company object and go straight to the selected card
+  const key = '_manual_' + Date.now();
+  const c = {key, name, reg:'', addr:'', manual:true};
+  selectCompaniesHouse(c);
+}
+
+// ─── ADDRESS SEARCH (mock HERE Maps autocomplete) ──────────────────
+const HERE_ADDRESSES = [
+  {line1:'14 Deansgate',line2:'',town:'Manchester',postcode:'M3 4LX',country:'United Kingdom'},
+  {line1:'Unit 5, Lever Street',line2:'',town:'Bolton',postcode:'BL1 1QZ',country:'United Kingdom'},
+  {line1:'Parkway Trading Estate',line2:'Brightside Lane',town:'Sheffield',postcode:'S9 4WA',country:'United Kingdom'},
+  {line1:'Cross Green Approach',line2:'',town:'Leeds',postcode:'LS9 0SA',country:'United Kingdom'},
+  {line1:'Hillington Park',line2:'Renfrew Road',town:'Glasgow',postcode:'G52 4SG',country:'United Kingdom'},
+  {line1:'Heath Mill Lane',line2:'Digbeth',town:'Birmingham',postcode:'B9 4AJ',country:'United Kingdom'},
+  {line1:'Tyseley Industrial Estate',line2:'Wharfdale Road',town:'Birmingham',postcode:'B11 2AQ',country:'United Kingdom'},
+  {line1:'Mount Road',line2:'',town:'Leeds',postcode:'LS6 4DG',country:'United Kingdom'},
+  {line1:'Quay Street',line2:'',town:'Liverpool',postcode:'L3 4AF',country:'United Kingdom'},
+  {line1:'Trafford Park',line2:'',town:'Manchester',postcode:'M17 1ED',country:'United Kingdom'},
+  {line1:'Eastfield Road',line2:'',town:'Bristol',postcode:'BS5 9AA',country:'United Kingdom'},
+  {line1:'71 Queen Victoria St',line2:'',town:'London',postcode:'EC4V 4AY',country:'United Kingdom'},
+  {line1:'Meridian Way',line2:'',town:'Southampton',postcode:'SO15 1HE',country:'United Kingdom'},
+  {line1:'Thorne Park',line2:'',town:'Doncaster',postcode:'DN8 5GA',country:'United Kingdom'}
+];
+
+const SVG_PIN = '<svg class="addr-result-pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14s5-4.5 5-8.5A5 5 0 0 0 3 5.5C3 9.5 8 14 8 14z"/><circle cx="8" cy="6" r="2"/></svg>';
+
+function addrSearchHandler(){
+  const q = (document.getElementById('addrInput').value||'').toLowerCase().trim();
+  const results = document.getElementById('addrResults');
+  if(!q || q.length < 2){results.classList.remove('open'); return;}
+  const norm = s => (s||'').toLowerCase().replace(/\s+/g,'');
+  const qNorm = norm(q);
+  const matches = HERE_ADDRESSES.filter(a =>
+    a.line1.toLowerCase().includes(q) ||
+    a.town.toLowerCase().includes(q) ||
+    norm(a.postcode).includes(qNorm)
+  ).slice(0,6);
+  if(!matches.length){
+    results.innerHTML = '<div class="cs-empty"><strong>No matches</strong>Try a different street, town or postcode.</div>';
+  } else {
+    results.innerHTML = matches.map((m,i) => `
+      <div class="addr-result" data-idx="${i}" onclick="selectAddress(${i})">
+        ${SVG_PIN}
+        <div class="addr-result-text">
+          <div class="addr-result-line1">${escapeHtml(m.line1)}</div>
+          <div class="addr-result-line2">${escapeHtml([m.line2,m.town,m.postcode].filter(Boolean).join(', '))}</div>
+        </div>
+      </div>
+    `).join('') + '<div class="addr-attribution">Powered by HERE Maps</div>';
+    results._matches = matches;
+  }
+  results.classList.add('open');
+}
+
+function selectAddress(idx){
+  const r = document.getElementById('addrResults');
+  const a = r._matches && r._matches[idx];
+  if(!a) return;
+  document.getElementById('fLine1').value = a.line1 || '';
+  document.getElementById('fLine2').value = a.line2 || '';
+  document.getElementById('fTown').value = a.town || '';
+  document.getElementById('fPostcode').value = a.postcode || '';
+  document.getElementById('fCountry').value = a.country || 'United Kingdom';
+  r.classList.remove('open');
+  document.getElementById('addrInput').value = '';
+  showToast('✓ Address auto-filled');
+}
+
+function selectCompaniesHouse(c, lockChange, vatPrefill){
+  pendingCompany = c;
+  document.getElementById('csSearch').style.display = 'none';
+  const wrap = document.getElementById('csSelectedWrap');
+  wrap.style.display = 'block';
+  const initials = initialsOf(c.name);
+  const lockIcon = `<svg style="display:inline;vertical-align:middle;margin-left:5px;opacity:.45;flex-shrink:0;" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="10" height="8" rx="2"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>`;
+  const isManual = c.manual;
+
+  // VAT: pre-fill from VAT-first search if provided, else from existing company record, else blank
+  const existingVat = vatPrefill || (COMPANIES[c.key] && COMPANIES[c.key].vat) || '';
+
+  wrap.innerHTML = `
+    <div class="cs-selected">
+      <div class="cs-sel-logo">${initials}</div>
+      <div class="cs-sel-info">
+        <div class="cs-sel-name" style="display:flex;align-items:center;">
+          ${isManual
+            ? `<input type="text" class="input" id="fManualName" style="font-size:13px;font-weight:600;padding:4px 8px;max-width:260px;" placeholder="Enter company name" value="${escapeHtml(c.name)}" oninput="pendingCompany.name=this.value">`
+            : `${escapeHtml(c.name)}${lockIcon}`}
+        </div>
+        ${isManual
+          ? `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
+               <label style="font-size:10.5px;color:var(--text-3);white-space:nowrap;">Reg</label>
+               <input type="text" class="input" id="fManualReg" style="font-size:12px;padding:4px 8px;font-family:var(--mono);max-width:140px;" placeholder="Company number (optional)" oninput="pendingCompany.reg=this.value">
+             </div>
+             <div style="margin-top:5px;font-size:11px;color:#B8650A;display:flex;align-items:center;gap:5px;">
+               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v4"/><circle cx="8" cy="11.5" r=".5" fill="currentColor"/></svg>
+               Not verified against Companies House
+             </div>`
+          : `<div class="cs-sel-meta" style="display:flex;align-items:center;">Reg ${escapeHtml(c.reg)}${lockIcon}</div>`}
+        ${(!isManual && c.addr)?`<div class="cs-sel-addr">${escapeHtml(c.addr)}</div>`:''}
+      </div>
+      ${lockChange ? '' : '<button class="cs-change" onclick="changeCompany()">Change</button>'}
+    </div>
+    <div class="cs-vat-field">
+      <label class="cs-vat-lbl" for="fVat">VAT number <span class="cs-vat-optional">optional</span></label>
+      <input id="fVat" type="text" class="input cs-vat-input${existingVat ? ' cs-vat-locked' : ''}" placeholder="Enter VAT number" value="${escapeHtml(existingVat)}" autocomplete="off" ${existingVat ? 'readonly' : ''} onchange="lockVatIfFilled(this)">
+      ${vatPrefill ? `<div class="cs-vat-prefilled"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8l2 2 3-3"/></svg>Pre-filled from your VAT search</div>` : ''}
+    </div>`;
+  ['contactSection','addressSection'].forEach(s => document.getElementById(s).classList.remove('disabled'));
+  document.getElementById('saveBtn').disabled = false;
+
+  // Trading name — always optional, blank by default
+  const taField = document.getElementById('tradingNameField');
+  const taInput = document.getElementById('fTradingName');
+  const taSuggest = document.getElementById('taSuggest');
+  const taSuggestName = document.getElementById('taSuggestName');
+  const co = COMPANIES[c.key];
+  const knownTa = (co && co.ta) ? co.ta : (c.ta || '');
+  if(editingContactId && knownTa){
+    taInput.value = knownTa;
+  } else {
+    taInput.value = '';
+  }
+  taField.style.display = 'block';
+  if(knownTa && !editingContactId){
+    taSuggestName.textContent = knownTa;
+    taSuggest.style.display = 'block';
+  } else {
+    taSuggest.style.display = 'none';
+  }
+  // Pre-fill address from Companies House addr if in add mode
+  if(c.addr && !editingContactId && !document.getElementById('fLine1').value){
+    const parts = c.addr.split(',').map(s => s.trim());
+    if(parts.length >= 3){
+      document.getElementById('fLine1').value = parts[0];
+      document.getElementById('fTown').value = parts[parts.length-2];
+      document.getElementById('fPostcode').value = parts[parts.length-1];
+    }
+  }
+  if(!editingContactId) setTimeout(() => document.getElementById('fName').focus(), 80);
+}
+
+function changeCompany(){
+  pendingCompany = null;
+  document.getElementById('csSearch').style.display = 'block';
+  document.getElementById('csSelectedWrap').style.display = 'none';
+  document.getElementById('csSelectedWrap').innerHTML = '';
+  document.getElementById('csInput').value = '';
+  // Hide trading name
+  const taField = document.getElementById('tradingNameField');
+  const taInput = document.getElementById('fTradingName');
+  const taSuggest = document.getElementById('taSuggest');
+  taInput.value = '';
+  taField.style.display = 'none';
+  if(taSuggest) taSuggest.style.display = 'none';
+  ['contactSection','addressSection'].forEach(s => document.getElementById(s).classList.add('disabled'));
+  document.getElementById('saveBtn').disabled = true;
+  setTimeout(() => document.getElementById('csInput').focus(), 80);
+}
+
+function deleteContactClick(){
+  if(!editingContactId) return;
+  const btn = document.getElementById('deleteBtn');
+  const lbl = document.getElementById('deleteBtnLabel');
+  // Two-step confirm: first click arms it, second click deletes
+  if(!btn.classList.contains('confirm')){
+    btn.classList.add('confirm');
+    lbl.textContent = 'Click again to confirm';
+    clearTimeout(btn._armTimer);
+    btn._armTimer = setTimeout(() => {
+      btn.classList.remove('confirm');
+      lbl.textContent = 'Delete contact';
+    }, 3500);
+    return;
+  }
+  // Confirmed: remove the contact
+  clearTimeout(btn._armTimer);
+  const idx = CONTACTS.findIndex(x => x.id === editingContactId);
+  if(idx !== -1) CONTACTS.splice(idx, 1);
+  editingContactId = null;
+  closeAddModal();
+  // Pick a sensible next selection
+  const next = CONTACTS[0];
+  selectedContactId = next ? next.id : null;
+  applyFilters();
+  setLayout('flat');
+  showToast('✓ Contact deleted');
+}
+
+function saveContact(){
+  if(!pendingCompany) return;
+  const name = document.getElementById('fName').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  const email = document.getElementById('fEmail').value.trim();
+  const line1 = document.getElementById('fLine1').value.trim();
+  const town = document.getElementById('fTown').value.trim();
+  const postcode = document.getElementById('fPostcode').value.trim();
+  if(!name || !phone || !email || !line1 || !town || !postcode){
+    showToast('Please complete the required fields (marked *)');
+    return;
+  }
+  // If brand-new company, register it (verified now)
+  if(!COMPANIES[pendingCompany.key]){
+    const vatEl = document.getElementById('fVat');
+    COMPANIES[pendingCompany.key] = {
+      name: pendingCompany.name, ta:'',
+      reg: pendingCompany.reg, vat: vatEl ? vatEl.value.trim() : '',
+      verifiedDate: TODAY.toISOString().slice(0,10),
+      logo:{init: initialsOf(pendingCompany.name), bg:'#E0F4EC', col:'#1A7A4A'}
+    };
+  }
+
+  // Risk is inherited from the verified company record (Companies House-driven)
+  const COMPANY_RISK = {acme:'low',atlas:'med',brindley:'high',caledonian:'low',midpoint:'med',pennine:'low'};
+  const inheritedRisk = COMPANY_RISK[pendingCompany.key] || 'low';
+
+  const data = {
+    name,
+    role: document.getElementById('fRole').value.trim() || '—',
+    company: pendingCompany.key,
+    risk: editingContactId
+      ? (CONTACTS.find(x => x.id === editingContactId)?.risk || inheritedRisk)
+      : inheritedRisk,
+    phone,
+    email,
+    address:{
+      line1, line2: document.getElementById('fLine2').value.trim(),
+      town, postcode, country: document.getElementById('fCountry').value
+    },
+    w3w: document.getElementById('fW3W').value.trim().replace(/^\/+/,''),
+    notes: document.getElementById('fNotes').value.trim(),
+    access: document.getElementById('fAccess').value.trim()
+  };
+
+  if(editingContactId){
+    // EDIT mode: update existing contact in place
+    const c = CONTACTS.find(x => x.id === editingContactId);
+    if(c){
+      Object.assign(c, data);
+      // Recompute avatar initials if name changed
+      c.avatar.init = initialsOf(name);
+    }
+    selectedContactId = editingContactId;
+    showToast('✓ Contact updated');
+  } else {
+    // ADD mode
+    const id = 'new-' + Date.now();
+    const palette = [
+      {bg:'#E8F0F8',col:'#2563A8'},{bg:'#FFF0D4',col:'#9B6310'},{bg:'#E0F4EC',col:'#1A7A4A'},
+      {bg:'#F0EBF8',col:'#6B3FA0'},{bg:'#FCE8E8',col:'#9B2828'},{bg:'#FDE8F0',col:'#A0245A'},
+      {bg:'#D4EAFF',col:'#1B57A0'}
+    ];
+    const av = palette[Math.floor(Math.random()*palette.length)];
+    CONTACTS.push({
+      id, ...data,
+      avatar:{init: initialsOf(name), bg: av.bg, col: av.col},
+      lastUsed:'', days:9999
+    });
+    selectedContactId = id;
+    showToast('✓ Contact added');
+  }
+
+  // Re-sort by surname
+  CONTACTS.sort((a,b) => surnameOf(a.name).localeCompare(surnameOf(b.name)));
+  closeAddModal();
+  applyFilters();
+  if(layout !== 'split') setLayout('split');
+}
+
+// Esc closes modal
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('addModal').classList.contains('show')){
+    closeAddModal();
+  }
+});
+
+// ─── MISC ──────────────────────────────────────────────────────────
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function copyW3W(w3w, btn){
+  if(!w3w) return;
+  navigator.clipboard?.writeText('///' + w3w).catch(()=>{});
+  btn.textContent = 'Copied!';
+  setTimeout(() => {btn.textContent = 'Copy';}, 1400);
+}
+
+document.querySelectorAll('.pg-num').forEach(n => {
+  n.addEventListener('click', () => {
+    if(n.style.cursor === 'default') return;
+    document.querySelectorAll('.pg-num').forEach(x => x.classList.remove('active'));
+    n.classList.add('active');
+  });
+});
+
+// ─── INIT ──────────────────────────────────────────────────────────
+applyFilters();
+renderSplitDetail();
+renderCompanyFlatList();
+</script>
+</body>
+</html>
